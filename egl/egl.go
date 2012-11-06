@@ -26,6 +26,7 @@ const EGLContext NoContext = EGL_NO_CONTEXT;
 import "C"
 
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -74,9 +75,10 @@ func Terminate(disp Display) Boolean {
 	return Boolean(C.eglTerminate(C.EGLDisplay(disp)))
 }
 func QueryString(disp Display, name Int) string {
+	//Its imoprtant that this is not explicitly freed. 
 	cstr := C.eglQueryString(C.EGLDisplay(disp), C.EGLint(name))
-	s := string(C.GoString(cstr))
-	C.free(unsafe.Pointer(cstr))
+	s := C.GoString(cstr)
+	fmt.Printf("%s\n", s)
 	return s
 }
 func GetConfigs(disp Display, configs *Config, configSize Int, numConfig *Int) Boolean {

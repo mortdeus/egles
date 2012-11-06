@@ -8,7 +8,6 @@ import (
 	"github.com/mortdeus/egles/egl"
 	//"github.com/mortdeus/egles/gl"
 	"time"
-	"unsafe"
 )
 
 var (
@@ -60,8 +59,6 @@ func run() {
 	}
 
 	pbuf = egl.CreatePbufferSurface(disp, configs[0], &attr[0])
-
-	C.free(unsafe.Pointer(&configs[0]))
 	configs = nil
 	b = egl.MakeCurrent(disp, pbuf, pbuf, ctx)
 	if b == egl.FALSE {
@@ -73,8 +70,14 @@ func run() {
 		println("MakeCurrent() failed")
 		return
 	}
+	fmt.Println()
+	fmt.Println("About to destroy surface and context.")
+	time.Sleep(1 * time.Second)
+	fmt.Println("*")
 
-	time.Sleep(7 * time.Second)
+	_ = egl.DestroySurface(disp, pbuf)
+	_ = egl.DestroyContext(disp, ctx)
+
 	return
 }
 
