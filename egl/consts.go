@@ -11,16 +11,9 @@ const (
 	/* EGL Enumerants. Bitmasks and other exceptional cases aside, most
 	 * enums are assigned unique values starting at 0x3000.
 	 */
-
 	/* EGL aliases */
 	FALSE = 0
 	TRUE  = 1
-
-	/* Out-of-band handle values */
-
-	/* Out-of-band attribute value */
-	DONT_CARE = Int(-1)
-
 	/* Errors / GetError return values */
 	SUCCESS             = 0x3000
 	NOT_INITIALIZED     = 0x3001
@@ -144,10 +137,6 @@ const (
 	 * aspect ratio are scaled when queried as integer values.
 	 */
 	DISPLAY_SCALING = 10000
-
-	/* Unknown display resolution/aspect ratio */
-	UNKNOWN = Int(-1)
-
 	/* Back buffer swap behaviors */
 	BUFFER_PRESERVED = 0x3094 /* SWAP_BEHAVIOR value */
 	BUFFER_DESTROYED = 0x3095 /* SWAP_BEHAVIOR value */

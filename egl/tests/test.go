@@ -26,10 +26,10 @@ var (
 )
 
 func run() {
-	disp := egl.GetDisplay(egl.DefaultDisplay)
+	disp := egl.GetDisplay(egl.DefaultDisplay())
 	defer egl.Terminate(disp)
 
-	if ok := egl.Initialize(disp, &max, &min); ok == egl.FALSE {
+	if ok := egl.Initialize(disp, &max, &min); !ok {
 		println("Initialize() failed")
 		return
 	}
@@ -39,34 +39,32 @@ func run() {
 	str := egl.QueryString(disp, egl.VENDOR)
 	fmt.Printf("EGL Vendor:  %s\n", str)
 
-	if b = egl.GetConfigs(disp, nil, 0, &numConfig); b == egl.FALSE {
+	if ok := egl.GetConfigs(disp, nil, 0, &numConfig); !ok {
 		println("GetConfigs() failed")
 	}
 
 	configs := make([]egl.Config, int(numConfig))
 
-	if b = egl.GetConfigs(disp, &configs[0], numConfig, &numConfig); b == egl.FALSE {
+	if ok := egl.GetConfigs(disp, &configs[0], numConfig, &numConfig); !ok {
 		println("GetConfigs() failed")
 		return
 	}
 
 	egl.BindAPI(egl.OPENGL_API)
 
-	ctx = egl.CreateContext(disp, configs[0], egl.NoContext, nil)
-	if ctx == egl.NoContext {
+	ctx = egl.CreateContext(disp, configs[0], egl.NoContext(), nil)
+	if ctx == egl.NoContext() {
 		println("CreateContext() failed")
 		return
 	}
 
 	pbuf = egl.CreatePbufferSurface(disp, configs[0], &attr[0])
 	configs = nil
-	b = egl.MakeCurrent(disp, pbuf, pbuf, ctx)
-	if b == egl.FALSE {
+	if ok := egl.MakeCurrent(disp, pbuf, pbuf, ctx); !ok {
 		println("MakeCurrent() failed")
 		return
-
 	}
-	if b = egl.MakeCurrent(disp, egl.NoSurface, egl.NoSurface, egl.NoContext); b == egl.FALSE {
+	if ok := egl.MakeCurrent(disp, egl.NoSurface(), egl.NoSurface(), egl.NoContext()); !ok {
 		println("MakeCurrent() failed")
 		return
 	}
