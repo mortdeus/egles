@@ -6,7 +6,7 @@ package egles
 
 import (
 	_ "github.com/mortdeus/egles/egl"
-	_ "github.com/mortdeus/egles/es"
+	_ "github.com/mortdeus/egles/es/gles2"
 	//_ "github.com/mortdeus/egles/gl"
 	_ "github.com/mortdeus/egles/khr"
 	_ "github.com/mortdeus/egles/misc"
