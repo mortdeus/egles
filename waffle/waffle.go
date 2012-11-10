@@ -25,10 +25,10 @@ type (
 	NativeConfig  C.union_waffle_native_config
 )
 
-func (c *Config) Choose(d *Display, attrbList []int32) {
+func (c *Config) Choose(d *Display, list []Attribute) {
 	nc := Config(*C.waffle_config_choose(
 		(*C.struct_waffle_display)(&(*d)),
-		(*C.int32_t)(&attrbList[0])))
+		(*C.int32_t)(&list[0])))
 	c = &nc
 }
 func (c *Config) Destroy() bool {
@@ -121,7 +121,7 @@ func EnumToString(e int32) string {
 
 const (
 	DONT_CARE                     = C.WAFFLE_DONT_CARE
-	NONE                          = C.WAFFLE_DONT_CARE
+	NONE                          = C.WAFFLE_NONE
 	PLATFORM                      = C.WAFFLE_PLATFORM
 	PLATFORM_ANDROID              = C.WAFFLE_PLATFORM_ANDROID
 	PLATFORM_CGL                  = C.WAFFLE_PLATFORM_CGL

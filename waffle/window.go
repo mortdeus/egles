@@ -38,6 +38,13 @@ func (w *Window) GetNative() *NativeConfig {
 		(*C.struct_waffle_window)(&(*w))))
 	return &nw
 }
+func (w *Window) Show() bool {
+	return bool(C.waffle_window_show((*C.struct_waffle_window)(&(*w))))
+}
+
+func (w *Window) SwapBuffers() bool {
+	return bool(C.waffle_window_swap_buffers((*C.struct_waffle_window)(&(*w))))
+}
 
 //waffle_wayland.h
 type (
