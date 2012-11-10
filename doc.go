@@ -4,6 +4,14 @@ Designed for the Go programming language to use with gocos2d.
 */
 package egles
 
+import (
+	_ "github.com/mortdeus/egles/egl"
+	_ "github.com/mortdeus/egles/es"
+	//_ "github.com/mortdeus/egles/gl"
+	_ "github.com/mortdeus/egles/khr"
+	_ "github.com/mortdeus/egles/misc"
+)
+
 /*
 TODO:
 EGL wrappers 		~30% 		done
