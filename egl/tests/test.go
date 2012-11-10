@@ -26,7 +26,8 @@ var (
 )
 
 func run() {
-	disp := egl.GetDisplay(egl.DefaultDisplay())
+	println(*egl.DefaultDisplay())
+	disp := egl.GetDisplay(*egl.DefaultDisplay())
 	defer egl.Terminate(disp)
 
 	if ok := egl.Initialize(disp, &max, &min); !ok {

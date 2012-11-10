@@ -6,16 +6,16 @@ package egl
 #include <EGL/egl.h>
 
 
-void *DefaultDisplay(){
+NativeDisplayType DefaultDisplay(){
 	return EGL_DEFAULT_DISPLAY;
 }
-void *NoContext(){
+EGLContext NoContext(){
 	return EGL_NO_CONTEXT;
 }
-void *NoDisplay(){
+EGLDisplay *NoDisplay(){
 	return EGL_NO_DISPLAY;
 }
-void *NoSurface(){
+EGLSurface *NoSurface(){
 	return EGL_NO_SURFACE;
 }
 EGLint DontCare(){
@@ -24,6 +24,7 @@ EGLint DontCare(){
 
 */
 import "C"
+import "unsafe"
 
 type (
 	Int               int32
@@ -34,9 +35,9 @@ type (
 	Display           uintptr
 	Surface           uintptr
 	ClientBuffer      uintptr
-	NativeDisplayType uintptr
-	NativeWindowType  uintptr
-	NativePixmapType  uintptr
+	NativeDisplayType C.EGLNativeDisplayType
+	NativeWindowType  C.EGLNativeWindowType
+	NativePixmapType  C.EGLNativePixmapType
 )
 
 func goBoolean(n C.EGLBoolean) (b Boolean) {
@@ -56,20 +57,21 @@ func ProcAdress(proc string) uintptr {
 
 }
 */
-func DefaultDisplay() NativeDisplayType {
-	return NativeDisplayType(C.DefaultDisplay())
+func DefaultDisplay() *NativeDisplayType {
+	disp := NativeDisplayType(C.DefaultDisplay())
+	return &disp
 }
 
 func NoSurface() Surface {
-	return Surface(C.NoSurface())
+	return Surface(unsafe.Pointer(C.NoSurface()))
 }
 
 func NoDisplay() Display {
-	return Display(C.NoDisplay())
+	return Display(unsafe.Pointer(C.NoDisplay()))
 }
 
 func NoContext() Context {
-	return Context(C.NoContext())
+	return Context(unsafe.Pointer(C.NoContext()))
 }
 func DontCare() Int {
 	return Int(C.DontCare())
