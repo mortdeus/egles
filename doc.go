@@ -10,6 +10,7 @@ import (
 	//_ "github.com/mortdeus/egles/gl"
 	_ "github.com/mortdeus/egles/khr"
 	_ "github.com/mortdeus/egles/misc"
+	_ "github.com/mortdeus/egles/waffle"
 )
 
 /*

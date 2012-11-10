@@ -16,7 +16,6 @@ func Init(attrbList *int32) {
 }
 
 //waffle_config.h
-
 type (
 	Config        C.struct_waffle_config
 	GbmConfig     C.struct_waffle_gbm_config
@@ -33,9 +32,9 @@ func (c *Config) Choose(d *Display, attrbList []int32) {
 	c = &nc
 }
 func (c *Config) Destroy() bool {
-	b := C.waffle_config_destroy(
-		(*C.struct_waffle_config)(&(*c)))
-	return bool(b)
+	return bool(C.waffle_config_destroy(
+		(*C.struct_waffle_config)(&(*c))))
+
 }
 func (c *Config) GetNative() *NativeConfig {
 	nc := NativeConfig(*C.waffle_config_get_native(
@@ -115,24 +114,61 @@ func DLSym(dl int32, name string) unsafe.Pointer {
 	return C.waffle_dl_sym(C.int32_t(dl), s)
 }
 
+//waffle_enum.h
+func EnumToString(e int32) string {
+	return C.GoString(C.waffle_enum_to_string(C.int32_t(e)))
+}
+
+const (
+	DONT_CARE                     = C.WAFFLE_DONT_CARE
+	NONE                          = C.WAFFLE_DONT_CARE
+	PLATFORM                      = C.WAFFLE_PLATFORM
+	PLATFORM_ANDROID              = C.WAFFLE_PLATFORM_ANDROID
+	PLATFORM_CGL                  = C.WAFFLE_PLATFORM_CGL
+	PLATFORM_GLX                  = C.WAFFLE_PLATFORM_GLX
+	PLATFORM_WAYLAND              = C.WAFFLE_PLATFORM_WAYLAND
+	PLATFORM_X11_EGL              = C.WAFFLE_PLATFORM_X11_EGL
+	PLATFORM_GBM                  = C.WAFFLE_PLATFORM_GBM
+	CONTEXT_API                   = C.WAFFLE_CONTEXT_API
+	CONTEXT_OPENGL                = C.WAFFLE_CONTEXT_OPENGL
+	CONTEXT_OPENGL_ES1            = C.WAFFLE_CONTEXT_OPENGL_ES1
+	CONTEXT_OPENGL_ES2            = C.WAFFLE_CONTEXT_OPENGL_ES2
+	CONTEXT_MAJOR_VERSION         = C.WAFFLE_CONTEXT_MAJOR_VERSION
+	CONTEXT_MINOR_VERSION         = C.WAFFLE_CONTEXT_MINOR_VERSION
+	CONTEXT_PROFILE               = C.WAFFLE_CONTEXT_PROFILE
+	CONTEXT_CORE_PROFILE          = C.WAFFLE_CONTEXT_CORE_PROFILE
+	CONTEXT_COMPATIBILITY_PROFILE = C.WAFFLE_CONTEXT_COMPATIBILITY_PROFILE
+	RED_SIZE                      = C.WAFFLE_RED_SIZE
+	GREEN_SIZE                    = C.WAFFLE_GREEN_SIZE
+	BLUE_SIZE                     = C.WAFFLE_BLUE_SIZE
+	ALPHA_SIZE                    = C.WAFFLE_ALPHA_SIZE
+	DEPTH_SIZE                    = C.WAFFLE_DEPTH_SIZE
+	STENCIL_SIZE                  = C.WAFFLE_STENCIL_SIZE
+	SAMPLE_BUFFERS                = C.WAFFLE_SAMPLE_BUFFERS
+	SAMPLES                       = C.WAFFLE_SAMPLES
+	DOUBLE_BUFFERED               = C.WAFFLE_DOUBLE_BUFFERED
+	ACCUM_BUFFER                  = C.WAFFLE_ACCUM_BUFFER
+	DL_OPENGL                     = C.WAFFLE_DL_OPENGL
+	DL_OPENGL_ES1                 = C.WAFFLE_DL_OPENGL_ES1
+	DL_OPENGL_ES2                 = C.WAFFLE_DL_OPENGL_ES2
+)
+
 //waffle_error.h
 type Error C.struct_waffle_error_info
 
 const (
-	NO_ERROR = 0x00 << iota
-	ERROR_FATAL
-	ERROR_UNKNOWN
-	ERROR_INTERNAL
-	ERROR_BAD_ALLOC
-	ERROR_NOT_INITIALIZED
-	ERROR_ALREADY_INITIALIZED
-	_
-	ERROR_BAD_ATTRIBUTE
-	_
-	ERROR_BAD_PARAMETER
-	ERROR_BAD_DISPLAY_MATCH
-	ERROR_UNSUPPORTED_ON_PLATFORM
-	ERROR_BUILT_WITHOUT_SUPPORT
+	NO_ERROR                      = C.WAFFLE_NO_ERROR
+	ERROR_FATAL                   = C.WAFFLE_ERROR_FATAL
+	ERROR_UNKNOWN                 = C.WAFFLE_ERROR_UNKNOWN
+	ERROR_INTERNAL                = C.WAFFLE_ERROR_INTERNAL
+	ERROR_BAD_ALLOC               = C.WAFFLE_ERROR_BAD_ALLOC
+	ERROR_NOT_INITIALIZED         = C.WAFFLE_ERROR_NOT_INITIALIZED
+	ERROR_ALREADY_INITIALIZED     = C.WAFFLE_ERROR_ALREADY_INITIALIZED
+	ERROR_BAD_ATTRIBUTE           = C.WAFFLE_ERROR_BAD_ATTRIBUTE
+	ERROR_BAD_PARAMETER           = C.WAFFLE_ERROR_BAD_PARAMETER
+	ERROR_BAD_DISPLAY_MATCH       = C.WAFFLE_ERROR_BAD_DISPLAY_MATCH
+	ERROR_UNSUPPORTED_ON_PLATFORM = C.WAFFLE_ERROR_UNSUPPORTED_ON_PLATFORM
+	ERROR_BUILT_WITHOUT_SUPPORT   = C.WAFFLE_ERROR_BUILT_WITHOUT_SUPPORT
 )
 
 func GetErrorCode() int32 {
@@ -145,3 +181,5 @@ func (e *Error) GetInfo() {
 func ErrorToString(e int32) string {
 	return C.GoString(C.waffle_error_to_string(C.int32_t(e)))
 }
+
+//waffle_gl_misc.h
