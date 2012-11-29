@@ -16,6 +16,7 @@ func Init(attrbList *int32) {
 }
 
 //waffle_config.h
+
 type (
 	Config        C.struct_waffle_config
 	GbmConfig     C.struct_waffle_gbm_config
@@ -105,6 +106,7 @@ func (d *Display) GetNative() *NativeDisplay {
 }
 
 //Waffle_dl.h
+
 func CanOpenDL(dl int32) bool {
 	return bool(C.waffle_dl_can_open(C.int32_t(dl)))
 }
@@ -154,6 +156,7 @@ const (
 )
 
 //waffle_error.h
+
 type Error C.struct_waffle_error_info
 
 const (

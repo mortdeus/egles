@@ -12,6 +12,7 @@ import "C"
 import "unsafe"
 
 //waffle_gl_misc.h
+
 type ProcAddress unsafe.Pointer
 
 func IsExtensionInString(ext string, extName string) bool {
@@ -35,6 +36,7 @@ func GetProcAddress(name string) ProcAddress {
 }
 
 //waffle_attrib_list.h
+
 type Attribute C.int32_t
 type AttributeList []Attribute
 

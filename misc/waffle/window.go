@@ -13,6 +13,7 @@ import "C"
 //import "unsafe"
 
 //waffle_window.h
+
 type (
 	Window        C.struct_waffle_Window
 	GbmWindow     C.struct_waffle_gbm_Window
@@ -47,6 +48,7 @@ func (w *Window) SwapBuffers() bool {
 }
 
 //waffle_wayland.h
+
 type (
 	WLCompositor   C.struct_wl_compositor
 	WLDisplay      C.struct_wl_display
@@ -57,6 +59,7 @@ type (
 )
 
 //waffle_gbm.h
+
 type (
 	GbmDevice  C.struct_gbm_surface
 	GbmSurface C.struct_gbm_device
