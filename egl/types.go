@@ -4,27 +4,9 @@ package egl
 #cgo pkg-config: egl
 #include <stdlib.h>
 #include <EGL/egl.h>
-
-
-NativeDisplayType DefaultDisplay(){
-	return EGL_DEFAULT_DISPLAY;
-}
-EGLContext NoContext(){
-	return EGL_NO_CONTEXT;
-}
-EGLDisplay *NoDisplay(){
-	return EGL_NO_DISPLAY;
-}
-EGLSurface *NoSurface(){
-	return EGL_NO_SURFACE;
-}
-EGLint DontCare(){
-	return EGL_DONT_CARE;
-} 
-
+#include <EGL/eglplatform.h>
 */
 import "C"
-import "unsafe"
 
 type (
 	Int               int32
@@ -35,9 +17,9 @@ type (
 	Display           uintptr
 	Surface           uintptr
 	ClientBuffer      uintptr
-	NativeDisplayType C.EGLNativeDisplayType
-	NativeWindowType  C.EGLNativeWindowType
-	NativePixmapType  C.EGLNativePixmapType
+	NativeDisplayType uintptr
+	NativeWindowType  uintptr
+	NativePixmapType  uintptr
 )
 
 func goBoolean(n C.EGLBoolean) (b Boolean) {
@@ -57,22 +39,3 @@ func ProcAdress(proc string) uintptr {
 
 }
 */
-func DefaultDisplay() *NativeDisplayType {
-	disp := NativeDisplayType(C.DefaultDisplay())
-	return &disp
-}
-
-func NoSurface() Surface {
-	return Surface(unsafe.Pointer(C.NoSurface()))
-}
-
-func NoDisplay() Display {
-	return Display(unsafe.Pointer(C.NoDisplay()))
-}
-
-func NoContext() Context {
-	return Context(unsafe.Pointer(C.NoContext()))
-}
-func DontCare() Int {
-	return Int(C.DontCare())
-}

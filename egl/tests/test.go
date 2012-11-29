@@ -5,9 +5,7 @@ import "C"
 
 import (
 	"fmt"
-	"github.com/mortdeus/egles/khronos/egl"
-	//"github.com/mortdeus/egles/gl"
-	"time"
+	"github.com/mortdeus/egles/egl"
 )
 
 var (
@@ -26,14 +24,15 @@ var (
 )
 
 func run() {
-	println(*egl.DefaultDisplay())
-	disp := egl.GetDisplay(*egl.DefaultDisplay())
-	defer egl.Terminate(disp)
+	disp := egl.GetDisplay(egl.DEFAULT_DISPLAY)
+
+	println(disp)
 
 	if ok := egl.Initialize(disp, &max, &min); !ok {
-		println("Initialize() failed")
+		panic("Initialize() failed")
 		return
 	}
+	defer egl.Terminate(disp)
 
 	fmt.Printf("EGL Version: %v, %v\n", max, min)
 
@@ -41,39 +40,34 @@ func run() {
 	fmt.Printf("EGL Vendor:  %s\n", str)
 
 	if ok := egl.GetConfigs(disp, nil, 0, &numConfig); !ok {
-		println("GetConfigs() failed")
+		panic("GetConfigs() failed")
 	}
 
 	configs := make([]egl.Config, int(numConfig))
 
 	if ok := egl.GetConfigs(disp, &configs[0], numConfig, &numConfig); !ok {
-		println("GetConfigs() failed")
+		panic("GetConfigs() failed")
 		return
 	}
 
 	egl.BindAPI(egl.OPENGL_API)
 
-	ctx = egl.CreateContext(disp, configs[0], egl.NoContext(), nil)
-	if ctx == egl.NoContext() {
-		println("CreateContext() failed")
+	ctx = egl.CreateContext(disp, configs[0], egl.NO_CONTEXT, nil)
+	if ctx == egl.NO_CONTEXT {
+		panic("CreateContext() failed")
 		return
 	}
 
 	pbuf = egl.CreatePbufferSurface(disp, configs[0], &attr[0])
 	configs = nil
 	if ok := egl.MakeCurrent(disp, pbuf, pbuf, ctx); !ok {
-		println("MakeCurrent() failed")
+		panic("MakeCurrent() failed")
 		return
 	}
-	if ok := egl.MakeCurrent(disp, egl.NoSurface(), egl.NoSurface(), egl.NoContext()); !ok {
-		println("MakeCurrent() failed")
+	if ok := egl.MakeCurrent(disp, egl.NO_SURFACE, egl.NO_SURFACE, ctx); !ok {
+		panic("MakeCurrent() failed")
 		return
 	}
-	fmt.Println()
-	fmt.Println("About to destroy surface and context.")
-	time.Sleep(1 * time.Second)
-	fmt.Println("*")
-
 	_ = egl.DestroySurface(disp, pbuf)
 	_ = egl.DestroyContext(disp, ctx)
 
@@ -82,4 +76,5 @@ func run() {
 
 func main() {
 	run()
+	println("Done")
 }

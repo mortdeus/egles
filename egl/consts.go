@@ -1,5 +1,12 @@
 package egl
 
+/*
+#cgo pkg-config: egl
+#include <EGL/egl.h>
+#include <EGL/eglplatform.h>
+*/
+import "C"
+
 const (
 	/* EGL Versioning */
 	VERSION_1_0 = 1
@@ -14,6 +21,15 @@ const (
 	/* EGL aliases */
 	FALSE = 0
 	TRUE  = 1
+	/* Out-of-band handle values */
+	DEFAULT_DISPLAY NativeDisplayType = 0
+	NO_CONTEXT      Context           = 0
+	NO_DISPLAY      Display           = 0
+	NO_SURFACE      Surface           = 0
+
+	/* Out-of-band attribute value */
+	DONT_CARE Int = -1
+
 	/* Errors / GetError return values */
 	SUCCESS             = 0x3000
 	NOT_INITIALIZED     = 0x3001
