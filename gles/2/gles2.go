@@ -1026,7 +1026,7 @@ func CreateShader(type_ Enum) Uint {
 		C.GLenum(type_)))
 }
 func GetAttribLocation(program Uint, name *string) uintptr {
-	s := glString(*name)	
+	s := glString(*name)
 	return uintptr(C.glGetAttribLocation(
 		C.GLuint(program),
 		s))
