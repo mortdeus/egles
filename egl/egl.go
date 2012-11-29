@@ -85,11 +85,11 @@ func GetConfigAttrib(
 		(*C.EGLint)(unsafe.Pointer(value))))
 }
 func ChooseConfig(
-	disp Display, configs *Config,
-	configSize Int, atrribList, numConfig *Int) Boolean {
+	disp Display, atrribList []Int, configs *Config,
+	configSize Int, numConfig *Int) Boolean {
 	return goBoolean(C.eglChooseConfig(
 		C.EGLDisplay(unsafe.Pointer(disp)),
-		(*C.EGLint)(atrribList),
+		(*C.EGLint)(&atrribList[0]),
 		(*C.EGLConfig)(unsafe.Pointer(configs)),
 		C.EGLint(configSize),
 		(*C.EGLint)(numConfig)))
