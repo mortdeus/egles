@@ -5,12 +5,12 @@ Designed for the Go programming language to use with gocos2d.
 package egles
 
 import (
-	_ "github.com/mortdeus/egles/egl"
-	_ "github.com/mortdeus/egles/es/gles2"
+	_ "github.com/mortdeus/egles/khronos/egl"
+	_ "github.com/mortdeus/egles/khronos/es/gles2"
 	//_ "github.com/mortdeus/egles/gl"
-	_ "github.com/mortdeus/egles/khr"
+	_ "github.com/mortdeus/egles/khronos/khr"
 	_ "github.com/mortdeus/egles/misc"
-	_ "github.com/mortdeus/egles/waffle"
+	//_ "github.com/mortdeus/egles/misc/waffle"
 )
 
 /*
