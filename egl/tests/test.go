@@ -6,6 +6,7 @@ import "C"
 import (
 	"fmt"
 	"github.com/mortdeus/egles/egl"
+	"github.com/mortdeus/egles/gles/2"
 )
 
 var (
@@ -25,33 +26,25 @@ var (
 
 func run() {
 	disp := egl.GetDisplay(egl.DEFAULT_DISPLAY)
-
-	println(disp)
+	defer egl.Terminate(disp)
 
 	if ok := egl.Initialize(disp, &max, &min); !ok {
 		panic("Initialize() failed")
 		return
 	}
-	defer egl.Terminate(disp)
 
 	fmt.Printf("EGL Version: %v, %v\n", max, min)
-
-	str := egl.QueryString(disp, egl.VENDOR)
-	fmt.Printf("EGL Vendor:  %s\n", str)
 
 	if ok := egl.GetConfigs(disp, nil, 0, &numConfig); !ok {
 		panic("GetConfigs() failed")
 	}
-
 	configs := make([]egl.Config, int(numConfig))
 
 	if ok := egl.GetConfigs(disp, &configs[0], numConfig, &numConfig); !ok {
 		panic("GetConfigs() failed")
-		return
 	}
 
-	egl.BindAPI(egl.OPENGL_API)
-
+	egl.BindAPI(egl.OPENGL_ES_API)
 	ctx = egl.CreateContext(disp, configs[0], egl.NO_CONTEXT, nil)
 	if ctx == egl.NO_CONTEXT {
 		panic("CreateContext() failed")
