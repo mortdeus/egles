@@ -4,6 +4,7 @@ package main
 import "C"
 
 import (
+	"github.com/mortdeus/egles"
 	"github.com/mortdeus/egles/egl"
 	gl "github.com/mortdeus/egles/gles/2"
 )
@@ -15,6 +16,7 @@ var (
 		egl.BLUE_SIZE, 1,
 		egl.NONE,
 	}
+	window       *egles.Window
 	display      egl.Display
 	config       egl.Config
 	context      egl.Context
@@ -29,9 +31,11 @@ func main() {
 	println("Done")
 }
 func initialize() {
+	egles.Init()
+
 	display = egl.GetDisplay(egl.DEFAULT_DISPLAY)
 	defer egl.Terminate(display)
-
+	
 	_ = egl.Initialize(display, nil, nil)
 	_ = egl.ChooseConfig(display, attr, &config, 1, &numConfig)
 	context = egl.CreateContext(display, config, egl.NO_CONTEXT, nil)
