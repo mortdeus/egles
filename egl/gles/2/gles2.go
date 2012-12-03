@@ -20,13 +20,13 @@ func AttachShader(
 		C.GLuint(shader))
 }
 func BindAttribLocation(
-	program Uint, index Uint, name *string) {
-	s := glString(*name)
+	program Uint, index Uint, name string) {
+	s := glString(name)
 	C.glBindAttribLocation(
 		C.GLuint(program),
 		C.GLuint(index),
 		s)
-	name = goString(s)
+
 }
 func BindBuffer(
 	target Enum, buffer Uint) {
@@ -1031,8 +1031,8 @@ func GetAttribLocation(program Uint, name *string) uintptr {
 		C.GLuint(program),
 		s))
 }
-func GetUniformLocation(program Uint, name *string) uintptr {
-	s := glString(*name)
+func GetUniformLocation(program Uint, name string) uintptr {
+	s := glString(name)
 	return uintptr(C.glGetUniformLocation(
 		C.GLuint(program),
 		s))

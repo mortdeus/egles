@@ -1,29 +1,16 @@
 package main
 
-import gl "github.com/mortdeus/egles/gles/2"
+import gl "github.com/mortdeus/egles/egl/gles/2"
+import "log"
 
-var fragShader = func() gl.Uint {
-	s := `
+var (
+	fsh = `
 	varying vec4 v_color;
 	
 	void main() {
 		gl_FragColor = v_color;
-	}
-`
-	shader := gl.CreateShader(gl.FRAGMENT_SHADER)
-	gl.ShaderSource(shader, 1, &s, nil)
-	gl.CompileShader(shader)
-	var stat *gl.Int
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, stat)
-	if stat == nil {
-
-		panic("Fragment Shader did not compile")
-	}
-	return shader
-
-}
-var vertShader = func() gl.Uint {
-	s := `
+	}`
+	vsh = `
     uniform mat4 modelviewProjection;
     attribute vec4 pos;
     attribute vec4 color;
@@ -34,21 +21,48 @@ var vertShader = func() gl.Uint {
        v_color = color;
     }
 `
+)
+
+func FragmentShader(s string) gl.Uint {
+	shader := gl.CreateShader(gl.FRAGMENT_SHADER)
+	gl.ShaderSource(shader, 1, &s, nil)
+	gl.CompileShader(shader)
+	var stat gl.Int
+	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
+	if stat != 0 {
+		log.Fatalln(stat)
+	}
+	return shader
+
+}
+
+func VertexShader(s string) gl.Uint {
+
 	shader := gl.CreateShader(gl.VERTEX_SHADER)
 	gl.ShaderSource(shader, 1, &s, nil)
 	gl.CompileShader(shader)
-	var stat *gl.Int
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, stat)
-	if stat == nil {
-		panic("Vertex shader did not compile")
+	var stat gl.Int
+	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
+	if stat != 0 {
+		log.Fatalln(stat)
 	}
 	return shader
 }
 
-var program = func() gl.Uint {
+func Program(fsh, vsh gl.Uint) gl.Uint {
 	p := gl.CreateProgram()
-	gl.AttachShader(p, fragShader())
-	gl.AttachShader(p, vertShader())
+	gl.AttachShader(p, fsh)
+	gl.AttachShader(p, vsh)
 	gl.LinkProgram(p)
+	var stat gl.Int
+	gl.GetProgramiv(p, gl.LINK_STATUS, &stat)
+
+	if stat != 0 {
+		var s = make([]byte, 1000)
+		var length gl.Sizei
+		_log := string(s)
+		gl.GetProgramInfoLog(p, 1000, &length, &_log)
+		log.Fatalf("Error: linking:\n%s\n", _log)
+	}
 	return p
 }
