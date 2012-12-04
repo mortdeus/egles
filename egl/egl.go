@@ -11,14 +11,14 @@ import (
 )
 
 func Initialize(
-	disp Display, major, minor *Int) Boolean {
+	disp Display, major, minor *int32) bool {
 	return goBoolean(C.eglInitialize(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		(*C.EGLint)(major),
 		(*C.EGLint)(minor)))
 }
 func Terminate(
-	disp Display) Boolean {
+	disp Display) bool {
 	return goBoolean(C.eglTerminate(
 		C.EGLDisplay(unsafe.Pointer(disp))))
 }
@@ -28,37 +28,37 @@ func GetDisplay(
 		C.EGLNativeDisplayType(unsafe.Pointer(displayID))))
 }
 func QueryString(
-	disp Display, name Int) string {
+	disp Display, name int32) string {
 	return C.GoString(C.eglQueryString(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLint(name)))
 }
 func DestroySurface(
-	disp Display, surface Surface) Boolean {
+	disp Display, surface Surface) bool {
 	return goBoolean(C.eglDestroySurface(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface))))
 }
 func SwapInterval(
-	disp Display, interval Int) Boolean {
+	disp Display, interval int32) bool {
 	return goBoolean(C.eglSwapInterval(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLint(interval)))
 }
 
 func DestroyContext(
-	disp Display, ctx Context) Boolean {
+	disp Display, ctx Context) bool {
 	return goBoolean(C.eglDestroyContext(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLContext(unsafe.Pointer(ctx))))
 }
-func GetCurrentSurface(readdraw Int) Surface {
+func GetCurrentSurface(readdraw int32) Surface {
 	return Surface(C.eglGetCurrentSurface(
 		C.EGLint(readdraw)))
 }
 func QuerySurface(
-	disp Display, value *Int,
-	attribute Int, surface Surface) Boolean {
+	disp Display, value *int32,
+	attribute int32, surface Surface) bool {
 	return goBoolean(C.eglQuerySurface(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface)),
@@ -67,7 +67,7 @@ func QuerySurface(
 }
 func GetConfigs(
 	disp Display, configs *Config,
-	configSize Int, numConfig *Int) Boolean {
+	configSize int32, numConfig *int32) bool {
 	return goBoolean(C.eglGetConfigs(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		(*C.EGLConfig)(unsafe.Pointer(configs)),
@@ -77,7 +77,7 @@ func GetConfigs(
 
 func GetConfigAttrib(
 	disp Display, config Config,
-	attribute Int, value *Int) Boolean {
+	attribute int32, value *int32) bool {
 	return goBoolean(C.eglGetConfigAttrib(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLConfig(config),
@@ -85,8 +85,8 @@ func GetConfigAttrib(
 		(*C.EGLint)(unsafe.Pointer(value))))
 }
 func ChooseConfig(
-	disp Display, atrribList []Int, configs *Config,
-	configSize Int, numConfig *Int) Boolean {
+	disp Display, atrribList []int32, configs *Config,
+	configSize int32, numConfig *int32) bool {
 	return goBoolean(C.eglChooseConfig(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		(*C.EGLint)(&atrribList[0]),
@@ -96,7 +96,7 @@ func ChooseConfig(
 }
 func CreateContext(
 	disp Display, config Config,
-	shareContext Context, attribList *Int) Context {
+	shareContext Context, attribList *int32) Context {
 	return Context(C.eglCreateContext(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLConfig(unsafe.Pointer(config)),
@@ -106,15 +106,15 @@ func CreateContext(
 
 func CreateWindowSurface(
 	disp Display, config Config,
-	win NativeWindowType, attribList *Int) Surface {
+	win NativeWindowType, attribList *int32) Surface {
 	return Surface(C.eglCreateWindowSurface(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLConfig(unsafe.Pointer(config)),
-		C.EGLNativeWindowType(win),
+		C.EGLNativeWindowType(uintptr(win)),
 		(*C.EGLint)(attribList)))
 }
 func CreatePbufferSurface(
-	disp Display, config Config, attribList *Int) Surface {
+	disp Display, config Config, attribList *int32) Surface {
 	return Surface(C.eglCreatePbufferSurface(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLConfig(unsafe.Pointer(config)),
@@ -122,17 +122,17 @@ func CreatePbufferSurface(
 }
 func CreatePixmapSurface(
 	disp Display, config Config,
-	pixmap NativePixmapType, attribList *Int) Surface {
+	pixmap NativePixmapType, attribList *int32) Surface {
 	return Surface(C.eglCreatePixmapSurface(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLConfig(config),
-		C.EGLNativePixmapType(pixmap),
+		C.EGLNativePixmapType(uintptr(pixmap)),
 		(*C.EGLint)(attribList)))
 }
 
 func CreatePbufferFromClientBuffer(
 	disp Display, buftype Enum, config Config,
-	buffer ClientBuffer, attribList *Int) Surface {
+	buffer ClientBuffer, attribList *int32) Surface {
 	return Surface(C.eglCreatePbufferFromClientBuffer(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLenum(buftype),
@@ -142,7 +142,7 @@ func CreatePbufferFromClientBuffer(
 }
 func SurfaceAttrib(
 	disp Display, surface Surface,
-	attribute Int, value Int) Boolean {
+	attribute int32, value int32) bool {
 	return goBoolean(C.eglSurfaceAttrib(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface)),
@@ -150,14 +150,14 @@ func SurfaceAttrib(
 		C.EGLint(value)))
 }
 func BindTexImage(
-	disp Display, surface Surface, buffer Int) Boolean {
+	disp Display, surface Surface, buffer int32) bool {
 	return goBoolean(C.eglBindTexImage(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface)),
 		C.EGLint(buffer)))
 }
 func ReleaseTexImage(
-	disp Display, surface Surface, buffer Int) Boolean {
+	disp Display, surface Surface, buffer int32) bool {
 	return goBoolean(C.eglReleaseTexImage(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface)),
@@ -165,7 +165,7 @@ func ReleaseTexImage(
 }
 func MakeCurrent(
 	disp Display, draw Surface,
-	read Surface, ctx Context) Boolean {
+	read Surface, ctx Context) bool {
 	return goBoolean(C.eglMakeCurrent(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(draw)),
@@ -174,7 +174,7 @@ func MakeCurrent(
 }
 func QueryContext(
 	disp Display, ctx Context,
-	attribute Int, value *Int) Boolean {
+	attribute int32, value *int32) bool {
 	return goBoolean(C.eglQueryContext(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLContext(unsafe.Pointer(ctx)),
@@ -183,41 +183,41 @@ func QueryContext(
 }
 func CopyBuffers(
 	disp Display, surface Surface,
-	target NativePixmapType) Boolean {
+	target NativePixmapType) bool {
 	return goBoolean(C.eglCopyBuffers(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface)),
-		C.EGLNativePixmapType(target)))
+		C.EGLNativePixmapType(uintptr(target))))
 }
 func SwapBuffers(
-	disp Display, surface Surface) Boolean {
+	disp Display, surface Surface) bool {
 	return goBoolean(C.eglSwapBuffers(
 		C.EGLDisplay(unsafe.Pointer(disp)),
 		C.EGLSurface(unsafe.Pointer(surface))))
 }
-func BindAPI(api Enum) Boolean {
+func BindAPI(api Enum) bool {
 	return goBoolean(C.eglBindAPI(
 		C.EGLenum(api)))
 }
-func WaitNative(engine Int) Boolean {
+func WaitNative(engine int32) bool {
 	return goBoolean(C.eglWaitNative(
 		C.EGLint(engine)))
 }
 func QueryAPI() Enum {
 	return Enum(C.eglQueryAPI())
 }
-func WaitClient() Boolean {
+func WaitClient() bool {
 	return goBoolean(C.eglWaitClient())
 }
-func WaitGL() Boolean {
+func WaitGL() bool {
 	return goBoolean(C.eglWaitGL())
 }
-func ReleaseThread() Boolean {
+func ReleaseThread() bool {
 	return goBoolean(C.eglReleaseThread())
 }
 func GetCurrentDisplay() Display {
 	return Display(C.eglGetCurrentDisplay())
 }
-func GetError() Int {
-	return Int(C.eglGetError())
+func GetError() int32 {
+	return int32(C.eglGetError())
 }

@@ -3,7 +3,7 @@ package egl
 import "log"
 import "strconv"
 
-func LogError(msg Int) {
+func LogError(msg int32) {
 	log.SetPrefix("[EGL] Error: ")
 	var s string
 	switch msg {

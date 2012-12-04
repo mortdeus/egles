@@ -7,29 +7,27 @@ package egl
 #include <EGL/eglplatform.h>
 */
 import "C"
+import "unsafe"
 
 type (
-	Int               int32
-	Boolean           bool
-	Enum              uint
+	Enum              uint32
 	Config            uintptr
 	Context           uintptr
 	Display           uintptr
 	Surface           uintptr
 	ClientBuffer      uintptr
-	NativeDisplayType uintptr
-	NativeWindowType  uintptr
-	NativePixmapType  uintptr
+	NativeDisplayType unsafe.Pointer
+	NativeWindowType  unsafe.Pointer
+	NativePixmapType  unsafe.Pointer
 )
 
-func goBoolean(n C.EGLBoolean) (b Boolean) {
-	b = Boolean(TRUE == n)
-	return
+func goBoolean(n C.EGLBoolean) bool {
+	return n == 1
 }
-func eglBoolean(n Boolean) C.EGLBoolean {
+func eglBoolean(n bool) C.EGLBoolean {
 	var b int
 	if n == true {
-		b = TRUE
+		b = 1
 	}
 	return C.EGLBoolean(b)
 }

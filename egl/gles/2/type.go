@@ -10,22 +10,13 @@ import "unsafe"
 
 type (
 	Void     unsafe.Pointer
-	Char     byte
 	Enum     uint32
-	Boolean  bool
 	Bitfield uint32
-	Byte     int8
-	Short    int16
-	Int      int32
 	Sizei    int32
-	UByte    byte
-	UShort   uint16
-	Uint     uint32
-	Float    float32
 	Clampf   float32
 	Fixed    uintptr
-	IntPtr   uintptr
-	SizeiPtr uintptr
+	IntPtr   int
+	SizeiPtr int
 )
 
 func glString(s string) *C.GLchar {
@@ -35,14 +26,14 @@ func goString(s *C.GLchar) *string {
 	gs := C.GoString((*C.char)(s))
 	return &gs
 }
-func goBoolean(n C.GLboolean) *Boolean {
-	b := Boolean(TRUE == n)
+func goBoolean(n C.GLboolean) *bool {
+	b := n == 1
 	return &b
 }
-func glBoolean(n Boolean) C.GLboolean {
+func glBoolean(n bool) C.GLboolean {
 	var b int
 	if n == true {
-		b = TRUE
+		b = 1
 	}
 	return C.GLboolean(b)
 }

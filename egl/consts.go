@@ -19,16 +19,18 @@ const (
 	 * enums are assigned unique values starting at 0x3000.
 	 */
 	/* EGL aliases */
-	FALSE = 0
-	TRUE  = 1
+
+	//FALSE = 0
+	//TRUE  = 1
+
 	/* Out-of-band handle values */
-	DEFAULT_DISPLAY NativeDisplayType = 0
-	NO_CONTEXT      Context           = 0
-	NO_DISPLAY      Display           = 0
-	NO_SURFACE      Surface           = 0
+	DEFAULT_DISPLAY = 0
+	NO_CONTEXT      = 0
+	NO_DISPLAY      = 0
+	NO_SURFACE      = 0
 
 	/* Out-of-band attribute value */
-	DONT_CARE Int = -1
+	DONT_CARE = -1
 
 	/* Errors / GetError return values */
 	SUCCESS             = 0x3000
