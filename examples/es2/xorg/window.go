@@ -22,6 +22,7 @@ func newWindow(X *xgbutil.XUtil) {
 			xevent.Detach(w.X, w.Id)
 			mousebind.Detach(w.X, w.Id)
 			w.Destroy()
+			xevent.Quit(X)
 			Done <- true
 		})
 
