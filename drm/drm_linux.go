@@ -8,13 +8,18 @@ import (
 type Handle_t uint32
 
 const (
-	NAME        = "drm" // Name in kernel, /dev, and /proc 
-	MIN_ORDER   = 5     // At least 2^5 bytes = 32 bytes 
-	MAX_ORDER   = 22    // Up to 2^22 bytes = 4MB 
-	RAM_PERCENT = 10    // How much system ram can we lock? 
-
-	LOCK_HELD = 0x80000000 // Hardware lock is held 
-	LOCK_CONT = 0x40000000 // Hardware lock is contended 
+	// Name in kernel, /dev, and /proc
+	NAME = "drm"
+	// At least 2^5 bytes = 32 bytes
+	MIN_ORDER = 5
+	// Up to 2^22 bytes = 4MB
+	MAX_ORDER = 22
+	// How much system ram can we lock?
+	RAM_PERCENT = 10
+	// Hardware lock is held 
+	LOCK_HELD = 0x80000000
+	// Hardware lock is contended
+	LOCK_CONT = 0x40000000
 )
 
 func LockIsHeld(lock uint32) uint32 {
@@ -24,7 +29,7 @@ func LockIsCont(lock uint32) uint32 {
 	return (lock & LOCK_CONT)
 }
 func LockingContext(lock uint32) uint32 {
-	return lock & -(LOCK_HELD | LOCK_CONT)
+	return lock & ^(uint32(LOCK_HELD) | uint32(LOCK_CONT))
 }
 
 type (
@@ -37,137 +42,166 @@ type (
 
 	  [NOTE] KW: Actually it's illegal to change either for
 	  backwards-compatibility reasons.*/
-	drm_clip_rect struct {
-		x1,
-		y1,
-		x2,
-		y2 uint16
+	ClipRect struct {
+		X1,
+		Y1,
+		X2,
+		Y2 uint16
 	}
 	/*Drawable information.*/
-	drm_drawable_info struct {
-		num_rects uint32
-		rects     *drm_clip_rect
+	DrawableInfo struct {
+		NumRects uint32
+		Rects    *ClipRect
 	}
 
 	/* Texture region,*/
-	drm_tex_region struct {
-		next,
-		prev,
-		in_use,
-		padding byte
-		age uint32
+	TexRegion struct {
+		Next,
+		Prev,
+		InUse,
+		Padding byte
+		Age uint32
 	}
 
 	/*Hardware lock. 
 	  The lock structure is a simple cache-line aligned integer.  To avoid
 	  processor bus contention on a multiprocessor system, there should not be any
 	  other data stored in the same cache line.*/
-	drm_hw_lock struct {
-		lock    uint32   // lock variable 
-		padding [60]byte // Pad to cache line 
+	HwLock struct {
+		// lock variable
+		Lock uint32
+		// Pad to cache line 
+		Padding [60]byte
+	}
+	/*IOCTL_VERSION [drmGetVersion()]*/
+	Version struct {
+		VersionMajor      int32
+		VersionMinor      int32
+		VersionPatchLevel int32
+		// Length of name buffer
+		NameLen int32
+		// Name of driver
+		Name *byte
+		// Length of date buffer
+		DateLen int32
+		// User-space buffer to hold date
+		Date *byte
+		// Length of desc buffer
+		DescLen int32
+		// User-space buffer to hold desc
+		Desc *byte
 	}
 
-	/*DRM_IOCTL_VERSION ioctl argument type.
-	[drmGetVersion()]*/
-	drm_version struct {
-		versionMajor      int32   // Major version 
-		versionMinor      int32   // Minor version 
-		versionPatchlevel int32   // Patch level 
-		name_len          uintptr // Length of name buffer 
-		name              *byte   // Name of driver 
-		date_len          uintptr // Length of date buffer 
-		date              *byte   // User-space buffer to hold date 
-		desc_len          uintptr // Length of desc buffer 
-		desc              *byte   // User-space buffer to hold desc 
+	/* IOCTL_GET_UNIQUE	[drmGetBusid() and drmSetBusId()]*/
+	Unique struct {
+		// Length of unique
+		UniqueLen int32
+		// Unique name for driver instantiation
+		Unique *byte
 	}
-
-	/* DRM_IOCTL_GET_UNIQUE ioctl argument type. 
-	[drmGetBusid() and drmSetBusId()]*/
-	drm_unique struct {
-		unique_len uintptr // Length of unique 
-		unique     *byte   // Unique name for driver instantiation 
+	List struct {
+		// Length of user-space structures 
+		Count   int32
+		Version *Version
 	}
-
-	drm_list struct {
-		count   int32 // Length of user-space structures 
-		version *drm_version
-	}
-
-	drm_block struct {
-		unused int32
+	Block struct {
+		Unused int32
 	}
 )
 
-/*DRM_IOCTL_CONTROL ioctl argument type. 
-  [drmCtlInstHandler() and drmCtlUninstHandler()]*/
+/*IOCTL_CONTROL [drmCtlInstHandler() and drmCtlUninstHandler()]*/
 const (
-	DRM_ADD_COMMAND = iota
-	DRM_RM_COMMAND
-	DRM_INST_HANDLER
-	DRM_UNINST_HANDLER
+	ADD_COMMAND = iota
+	RM_COMMAND
+	INST_HANDLER
+	UNINST_HANDLER
 )
 
-type drm_control struct {
+type Control struct {
 	Func,
 	Irq int32
 }
 
 /*Type of memory to map.*/
 const (
-	FRAME_BUFFER   = iota // WC (no caching), no core dump 
-	REGISTERS             // no caching, no core dump 
-	SHM                   // shared, cached 
-	AGP                   // AGP/GART 
-	SCATTER_GATHER        // Scatter/gather memory for PCI DMA 
-	CONSISTENT            // Consistent memory for PCI DMA 
+	// WC (no caching), no core dump
+	FRAME_BUFFER = iota
+	// no caching, no core dump
+	REGISTERS
+	// shared, cached
+	SHM
+	// AGP/GART
+	AGP
+	// Scatter/gather memory for PCI DMA 
+	SCATTER_GATHER
+	// Consistent memory for PCI DMA
+	CONSISTENT
+	/* GEM object */
 	GEM
 )
 
-type drm_map_type int32 // GEM object 
+type MapType int32
 
 /* Memory mapping flags.*/
 const (
-	RESTRICTED      = 0x01 // Cannot be mapped to user-virtual 
-	READ_ONLY       = 0x02
-	LOCKED          = 0x04 // shared, cached, locked 
-	KERNEL          = 0x08 // kernel requires access 
-	WRITE_COMBINING = 0x10 // use write-combining if available 
-	CONTAINS_LOCK   = 0x20 // SHM page that contains lock 
-	REMOVABLE       = 0x40 // Removable mapping 
-	DRIVER          = 0x80 // Managed by driver 
+	// Cannot be mapped to user-virtual
+	RESTRICTED = 0x01
+	READ_ONLY  = 0x02
+	// shared, cached, locked
+	LOCKED = 0x04
+	// kernel requires access
+	KERNEL = 0x08
+	// use write-combining if available
+	WRITE_COMBINING = 0x10
+	// SHM page that contains lock
+	CONTAINS_LOCK = 0x20
+	// Removable mapping
+	REMOVABLE = 0x40
+	// Managed by driver
+	DRIVER = 0x80
 )
 
-type drm_map_flags int32
+type MapFlags int32
 
-type drm_ctx_priv_map struct {
-	ctx_id uint32         // Context requesting private mapping 
-	handle unsafe.Pointer // Handle of map 
+type CtxPrivMap struct {
+	// Context requesting private mapping
+	CtxID uint32
+	// Handle of map
+	Handle unsafe.Pointer
 }
 
-/*DRM_IOCTL_GET_MAP, DRM_IOCTL_ADD_MAP and DRM_IOCTL_RM_MAP ioctls
-  argument type.
-  [drmAddMap()]*/
-type drm_map struct {
-	Offset, // Requested physical address (0 for SAREA)
-	Size uint32 // Requested physical size (bytes) 
-	Type   drm_map_type   // Type of memory to map 
-	Flags  drm_map_flags  // Flags 
-	handle unsafe.Pointer // User-space: "Handle" to pass to mmap() 
+/*IOCTL_GET_MAP, IOCTL_ADD_MAP and IOCTL_RM_MAP  [drmAddMap()]*/
+type Map struct {
+	// Requested physical address (0 for SAREA)
+	Offset,
+	// Requested physical size (bytes)
+	Size uint32
+	// Type of memory to map 
+	Type  MapType
+	Flags MapFlags
+	// User-space: "Handle" to pass to mmap()
+	Handle unsafe.Pointer
+
 	// Kernel-space: kernel-virtual address 
-	mtrr int32 // MTRR slot used 
-	/*   Private data */
+	// MTRR slot used
+	Mtrr int32
+
+	/*Private data*/
 }
 
-/**
- * DRM_IOCTL_GET_CLIENT ioctl argument type.
- */
-type drm_client struct {
-	idx, // Which client desired? 
-	auth int32 // Is client authenticated? 
-	pid, // Process ID 
-	uid, // User ID 
-	magic, // Magic 
-	iocs uint32 // Ioctl count 
+/*IOCTL_GET_CLIENT */
+type Client struct {
+	// Which client desired?
+	Idx,
+	// Is client authenticated?
+	Auth int32
+	// Process ID
+	Pid,
+	// User ID
+	Uid,
+	Magic,
+	// Ioctl Count
+	Iocs uint32
 }
 
 const (
@@ -183,23 +217,30 @@ const (
 	STAT_BYTE
 	// Generic non-byte counter (1000/k) 
 	STAT_COUNT
+	// IRQ 
+	STAT_IRQ
+	// Primary DMA bytes
+	STAT_PRIMARY
+	// Secondary DMA bytes
+	STAT_SECONDARY
+	// DMA
+	STAT_DMA
+	// Special DMA (e.g., priority or polled)
+	STAT_SPECIAL
+	// Missed DMA opportunity
+	STAT_MISSED
 
-	STAT_IRQ       // IRQ 
-	STAT_PRIMARY   // Primary DMA bytes 
-	STAT_SECONDARY // Secondary DMA bytes 
-	STAT_DMA       // DMA 
-	STAT_SPECIAL   // Special DMA (e.g., priority or polled) 
-	STAT_MISSED    // Missed DMA opportunity 
-	/* Add to the *END* of the list */)
+/* Add to the *END* of the list */
+)
 
-type drm_stat_type int32
+type StatType int32
 
-/* DRM_IOCTL_GET_STATS ioctl argument type.*/
-type drm_stats struct {
-	count uint32
-	data  [15]struct {
+/* IOCTL_GET_STATS */
+type Stats struct {
+	Count uint32
+	Data  [15]struct {
 		Value uint32
-		Type  drm_stat_type
+		Type  StatType
 	}
 }
 
@@ -214,9 +255,8 @@ const (
 	// Flush all DMA queues first 
 	LOCK_FLUSH_ALL = 0x08
 
-	/* These *HALT* flags aren't supported yet
-	   they will be used to support the
-	   full-screen DGA-like mode.*/
+	/* These *HALT* flags aren't supported yet they will 
+	be used to support the full-screen DGA-like mode.*/
 
 	// Halt all current and future queues 
 	HALT_ALL_QUEUES = 0x10
@@ -224,32 +264,20 @@ const (
 	HALT_CUR_QUEUES = 0x20
 )
 
-type drm_lock_flags int32
+type LockFlags int32
 
-/*DRM_IOCTL_LOCK, 
-  DRM_IOCTL_UNLOCK and 
-  DRM_IOCTL_FINISH ioctl argument type. 
-  drmGetLock() and drmUnlock().*/
-
-type drm_lock struct {
-	context int32
-	flags   drm_lock_flags
+/*IOCTL_LOCK, IOCTL_UNLOCK and IOCTL_FINISH [drmGetLock() and drmUnlock()]*/
+type Lock struct {
+	Context int32
+	Flags   LockFlags
 }
 
-/*DMA flags  
-  [WARNING]
-  These values must match xf86drm.h.*/
-
-//Flags for DMA buffer dispatch 
+/*DMA Flags WARNING: These values must match xf86drm.h. Flags for DMA buffer dispatch */
 const (
-	/*
-	 Block until buffer dispatched.
-	 note The buffer may not yet have
-	 been processed by the hardware --
-	 getting a hardware lock with the
-	 hardware quiescent will ensure
-	 that the buffer has been processed.
-	*/
+	/*	Block until buffer dispatched.	 
+		NOTE: The buffer may not yet have been processed by the hardware. 
+		Getting a hardware lock with the hardware quiescent will ensure 
+		that the buffer has been processed.*/
 	DMA_BLOCK = 0x01
 	// Dispatch while lock held   
 	DMA_WHILE_LOCKED = 0x02
@@ -266,75 +294,90 @@ const (
 	DMA_LARGER_OK = 0x40
 )
 
-type drm_dma_flags int32
+type DmaFlags int32
 
-/**
- * DRM_IOCTL_ADD_BUFS and DRM_IOCTL_MARK_BUFS ioctl argument type.
- *
- * \sa drmAddBufs().
- */
+/*IOCTL_ADD_BUFS and IOCTL_MARK_BUFS [drmAddBufs()]*/
 const (
-	PAGE_ALIGN    = 0x01 // Align on page boundaries for DMA */
-	AGP_BUFFER    = 0x02 // Buffer is in AGP space */
-	SG_BUFFER     = 0x04 // Scatter/gather memory buffer */
-	FB_BUFFER     = 0x08 // Buffer is in frame buffer */
-	PCI_BUFFER_RO = 0x10 // Map PCI DMA buffer read-only */
+	// Align on page boundaries for DMA 
+	PAGE_ALIGN = 0x01
+	// Buffer is in AGP space
+	AGP_BUFFER = 0x02
+	// Scatter/gather memory buffer
+	SG_BUFFER = 0x04
+	// Buffer is in frame buffer
+	FB_BUFFER = 0x08
+	// Map PCI DMA buffer read-only
+	PCI_BUFFER_RO = 0x10
 )
 
-type drm_buf_desc struct {
-	count, // Number of buffers of this size */
-	size, // Size in bytes */
-	low_mark, // Low water mark */
-	high_mark int // High water mark */
-	flags int32
+type BufDesc struct {
+	// Number of buffers of this size
+	Count,
+	// Size in bytes 
+	Size,
+	// Low water mark
+	LowMark,
+	// High water mark 
+	HighMark int
+	Flags int32
 	//Start address of where the AGP buffers are in the AGP aperture
-	agp_start uint32
+	AgpStart uint32
 }
 
-/**
- * DRM_IOCTL_INFO_BUFS ioctl argument type.
- */
-type drm_buf_info struct {
-	count int32 // Entries in list */
-	list  *drm_buf_desc
+/*IOCTL_INFO_BUFS */
+type BufInfo struct {
+	Count int32 // Entries in list 
+	List  *BufDesc
 }
 
-/**
- * DRM_IOCTL_FREE_BUFS ioctl argument type.
- */
-type drm_buf_free struct {
-	count int
-	list  *int
+/*IOCTL_FREE_BUFS */
+type BufFree struct {
+	Count int
+	List  *int
 }
 
 /* Buffer information */
-type drm_buf_pub struct {
-	idx, // Index into the master buffer list */
-	total, // Buffer size */
-	used int // Amount of buffer in use (for DMA) */
-	address unsafe.Pointer // Address of buffer */
+type BufPub struct {
+	// Index into the master buffer list 
+	Idx,
+	// Buffer size
+	Total,
+	// Amount of buffer in use (for DMA)
+	Used int
+	// Address of buffer
+	Address unsafe.Pointer
 }
 
-/*DRM_IOCTL_MAP_BUFS ioctl argument type.*/
-type drm_buf_map struct {
-	count   int32          // Length of the buffer list */
-	virtual unsafe.Pointer // Mmap'd area in user-virtual */
-	list    *drm_buf_pub   // Buffer information */
+/*IOCTL_MAP_BUFS */
+type BufMap struct {
+	// Length of the buffer list
+	Count int32
+	// Mmap'd area in user-virtual
+	Virtual unsafe.Pointer
+	// Buffer information
+	List *BufPub
 }
 
-/*DRM_IOCTL_DMA ioctl argument type. 
-  Indices here refer to the offset into the buffer list in drm_buf_get. */
-type drm_dma struct {
-	context, // Context handle */
-	send_count int32 // Number of buffers to send */
-	send_indices, // List of handles to buffers */
-	send_sizes *int32 // Lengths of data to send */
-	flags          drm_dma_flags // Flags */
-	request_count, // Number of buffers requested */
-	request_size int32 // Desired size for buffers */
-	request_indices, // Buffer information */
-	request_sizes *int32
-	granted_count int32 // Number of buffers granted */
+/*IOCTL_DMA Indices here refer to the offset into the buffer list in buf_get. */
+type Dma struct {
+	// Context handle
+	Context,
+	// Number of buffers to send
+	SendCount int32
+	// List of handles to buffers
+	SendIndices,
+	// Lengths of data to send
+	SendSizes *int32
+	Flags DmaFlags
+	// Number of buffers requested
+	RequestCount,
+	// Desired size for buffers
+	RequestSize int32
+	// Buffer information
+	RequestIndices,
+	RequestSizes *int32
+	// Number of buffers granted
+	GrantedCount int32
 }
 
 const (
@@ -342,96 +385,98 @@ const (
 	CONTEXT_2DONLY    = 0x02
 )
 
-type drm_ctx_flags int32
+type CtxFlags int32
 
-/*DRM_IOCTL_ADD_CTX ioctl argument type.*/
-type drm_ctx struct {
-	handle drm_context_t
-	flags  drm_ctx_flags
+/*IOCTL_ADD_CTX */
+type Ctx struct {
+	Handle Context_t
+	Flags  CtxFlags
 }
 
-/**
- * DRM_IOCTL_RES_CTX ioctl argument type.
- */
-type drm_ctx_res struct {
-	count    int32
-	contexts *drm_ctx
+/*IOCTL_RES_CTX */
+type CtxRes struct {
+	Count    int32
+	Contexts *Ctx
 }
 
-/**
- * DRM_IOCTL_ADD_DRAW and DRM_IOCTL_RM_DRAW ioctl argument type.
- */
-type drm_draw struct {
-	drm_drawable_t handle
+/*IOCTL_ADD_DRAW and IOCTL_RM_DRAW */
+type Draw struct {
+	Handle Drawable_t
 }
 
-/*DRM_IOCTL_UPDATE_DRAW ioctl argument type.*/
+/*IOCTL_UPDATE_DRAW */
 const (
-	DRM_DRAWABLE_CLIPRECTS = 0
+	DRAWABLE_CLIPRECTS = 0
 )
 
-type drm_drawable_info_type_t int32
+type DrawableInfoType_t int32
 
-type drm_update_draw struct {
-	handle drm_drawable_t
+type UpdateDraw struct {
+	Handle Drawable_t
 	Type,
-	num uint32
-	data uint64
+	Num uint32
+	Data uint64
 }
 
-/* DRM_IOCTL_GET_MAGIC and DRM_IOCTL_AUTH_MAGIC ioctl argument type.*/
-type drm_auth struct {
-	magic drm_magic_t
+/* IOCTL_GET_MAGIC and IOCTL_AUTH_MAGIC */
+type Auth struct {
+	Magic Magic_t
 }
 
-/**
- * DRM_IOCTL_IRQ_BUSID ioctl argument type.
- *
- * \sa drmGetInterruptFromBusID().
- */
-type drm_irq_busid struct {
-	irq, // IRQ number */
-	busnum, // bus number */
-	devnum, // device number */
-	funcnum int32 // function number */
+/* IOCTL_IRQ_BUSID [drmGetInterruptFromBusID()]*/
+type IrqBusID struct {
+	// IRQ number
+	Irq,
+	// bus number
+	BusNum,
+	// device number
+	DevNum,
+	//function number
+	FuncNum int32
 }
 
-// enum drm_vblank_seq_type {
-// 	VBLANK_ABSOLUTE = 0x0,	// Wait for specific vblank sequence number */
-// 	VBLANK_RELATIVE = 0x1,	// Wait for given number of vblanks */
-// 	VBLANK_EVENT = 0x4000000,   // Send event instead of blocking */
-// 	VBLANK_FLIP = 0x8000000,   // Scheduled buffer swap should flip */
-// 	VBLANK_NEXTONMISS = 0x10000000,	*< If missed, wait for next vblank 
-// 	VBLANK_SECONDARY = 0x20000000,	// Secondary display controller */
-// 	VBLANK_SIGNAL = 0x40000000	// Send signal instead of blocking, unsupported */
-// }
+const (
+	// Wait for specific vblank sequence number
+	VBLANK_ABSOLUTE = 0x0
+	// Wait for given number of vblanks
+	VBLANK_RELATIVE = 0x1
+	// Send event instead of blocking
+	VBLANK_EVENT = 0x4000000
+	// Scheduled buffer swap should flip
+	VBLANK_FLIP = 0x8000000
+	// If missed, wait for next vblank
+	VBLANK_NEXTONMISS = 0x10000000
+	// Secondary display controller
+	VBLANK_SECONDARY = 0x20000000
+	// Send signal instead of blocking, unsupported
+	VBLANK_SIGNAL = 0x40000000
+)
 
-// #define VBLANK_TYPES_MASK (VBLANK_ABSOLUTE | VBLANK_RELATIVE)
-// #define VBLANK_FLAGS_MASK (VBLANK_EVENT | VBLANK_SIGNAL | \
-// 				VBLANK_SECONDARY | VBLANK_NEXTONMISS)
+type VblankSeqType int32
 
-type drm_wait_vblank_request struct {
-	Type     drm_vblank_seq_type
-	sequence uint32
-	signal   uint32
+const (
+	VBLANK_TYPES_MASK = (VBLANK_ABSOLUTE | VBLANK_RELATIVE)
+	VBLANK_FLAGS_MASK = (VBLANK_EVENT | VBLANK_SIGNAL | VBLANK_SECONDARY | VBLANK_NEXTONMISS)
+)
+
+type WaitVblankRequest struct {
+	Type     VblankSeqType
+	Sequence uint32
+	Signal   uint32
 }
 
-type drm_wait_vblank_reply struct {
-	Type     drm_vblank_seq_type
-	sequence uint32
-	tval_sec,
-	tval_usec int32
+type WaitVblankReply struct {
+	Type     VblankSeqType
+	Sequence uint32
+	TvalSec,
+	TvalUsec int32
 }
 
-/**
- * DRM_IOCTL_WAIT_VBLANK ioctl argument type.
- *
- * \sa drmWaitVBlank().
- */
-//This was a union.
-type drm_wait_vblank struct {
-	request drm_wait_vblank_request
-	reply   drm_wait_vblank_reply
+/*IOCTL_WAIT_VBLANK [drmWaitVBlank()]*/
+//This was a union, how do I map this?
+type WaitVblank struct {
+	Request WaitVblankRequest
+	Reply   WaitVblankReply
 }
 
 const (
@@ -439,250 +484,234 @@ const (
 	POST_MODESET = 2
 )
 
-/**
- * DRM_IOCTL_MODESET_CTL ioctl argument type
- *
- * \sa drmModesetCtl().
- */
-type drm_modeset_ctl struct {
-	crtc,
-	cmd uint32
+/*IOCTL_MODESET_CTL[drmModesetCtl()]*/
+type ModesetCtl struct {
+	Crtc,
+	Cmd uint32
 }
 
-/**
- * DRM_IOCTL_AGP_ENABLE ioctl argument type.
- *
- * \sa drmAgpEnable().
- */
-type drm_agp_mode struct {
-	mode uint32 // AGP mode */
+/* IOCTL_AGP_ENABLE [drmAgpEnable()]*/
+type AgpMode struct {
+	mode uint32
 }
 
-/**
- * DRM_IOCTL_AGP_ALLOC and DRM_IOCTL_AGP_FREE ioctls argument type.
- *
- * \sa drmAgpAlloc() and drmAgpFree().
- */
-type drm_agp_buffer struct {
-	size, // In bytes -- will round to page boundary */
-	handle, // Used for binding / unbinding */
-	Type, // Type of memory to allocate */
-	physical uint32 // Physical used by i810 */
+/*IOCTL_AGP_ALLOC and IOCTL_AGP_FREE [drmAgpAlloc() and drmAgpFree()]*/
+type AgpBuffer struct {
+	// In bytes -- will round to page boundary
+	Size,
+	// Used for binding / unbinding
+	Handle,
+	// Type of memory to allocate
+	Type,
+	// Physical used by i810
+	Physical uint32
 }
 
-/**
- * DRM_IOCTL_AGP_BIND and DRM_IOCTL_AGP_UNBIND ioctls argument type.
- *
- * \sa drmAgpBind() and drmAgpUnbind().
- */
-type drm_agp_binding struct {
-	handle, // From drm_agp_buffer */
-	offset uint32 // In bytes -- will round to page boundary */
+/*IOCTL_AGP_BIND and IOCTL_AGP_UNBIND [drmAgpBind() and drmAgpUnbind()].*/
+type AgpBinding struct {
+	// From agp_buffer
+	Handle,
+	// In bytes -- will round to page boundary
+	Offset uint32
 }
 
-/**
- * DRM_IOCTL_AGP_INFO ioctl argument type.
- *
- * \sa drmAgpVersionMajor(), drmAgpVersionMinor(), drmAgpGetMode(),
- * drmAgpBase(), drmAgpSize(), drmAgpMemoryUsed(), drmAgpMemoryAvail(),
- * drmAgpVendorId() and drmAgpDeviceId().
- */
-type drm_agp_info struct {
-	agp_version_major,
-	agp_version_minor int32
-	mode,
-	aperture_base, /* physical address */
-	aperture_size, /* bytes */
-	memory_allowed, /* bytes */
-	memory_used uint32
+/*IOCTL_AGP_INFO drmAgpVersionMajor(), drmAgpVersionMinor(), drmAgpGetMode(), drmAgpBase(), 
+drmAgpSize(), drmAgpMemoryUsed(), drmAgpMemoryAvail(),drmAgpVendorId() and drmAgpDeviceId().*/
+type AgpInfo struct {
+	AgpVersionMajor,
+	AgpVersionMinor int32
+	Mode,
+	// physical address 
+	ApertureBase,
+	// bytes 
+	ApertureSize,
+	// bytes
+	MemoryAllowed,
+	MemoryUsed uint32
 
-	/* PCI information */
-	id_vendor,
-	id_device uint16
+	// PCI information 
+	IdVendor,
+	IdDevice uint16
 }
 
-/**
- * DRM_IOCTL_SG_ALLOC ioctl argument type.
- */
-type drm_scatter_gather struct {
-	size, // In bytes -- will round to page boundary */
-	handle uint32 // Used for mapping / unmapping */
+/*IOCTL_SG_ALLOC */
+type ScatterGather struct {
+	// In bytes -- will round to page boundary 
+	Size,
+	// Used for mapping / unmapping 
+	Handle uint32
 }
 
-/**
- * DRM_IOCTL_SET_VERSION ioctl argument type.
- */
-type drm_set_version struct {
-	drm_di_major,
-	drm_di_minor,
-	drm_dd_major,
-	drm_dd_minor int32
+/*IOCTL_SET_VERSION */
+type SetVersion struct {
+	DiMajor,
+	DiMinor,
+	DdMajor,
+	DdMinor int32
 }
 
-/** DRM_IOCTL_GEM_CLOSE ioctl argument type */
-type drm_gem_close struct {
-	/** Handle of the object to be closed. */
-	handle,
-	pad uint32
+/* IOCTL_GEM_CLOSE */
+type GemClose struct {
+	// Handle of the object to be closed. 
+	Handle,
+	Pad uint32
 }
 
-/** DRM_IOCTL_GEM_FLINK ioctl argument type */
-type drm_gem_flink struct {
-	/** Handle for the object being named */
-	handle,
+/* IOCTL_GEM_FLINK */
+type GemFlink struct {
+	//Handle for the object being named 
+	Handle,
 
-	/** Returned global name */
-	name uint32
+	// Returned global name 
+	Name uint32
 }
 
-/** DRM_IOCTL_GEM_OPEN ioctl argument type */
-type drm_gem_open struct {
-	/** Name of object being opened */
-	name,
+/* IOCTL_GEM_OPEN */
+type GemOpen struct {
+	// Name of object being opened 
+	Name,
 
-	/** Returned handle for the object */
-	handle uint32
+	// Returned handle for the object 
+	Handle uint32
 
-	/** Returned size of the object */
-	size uint64
+	// Returned size of the object 
+	Size uint64
 }
 
-/* DRM_IOCTL_GET_CAP ioctl argument type */
-type drm_get_cap struct {
-	capability,
-	value uint64
+/* IOCTL_GET_CAP */
+type GetCap struct {
+	Capability,
+	Value uint64
 }
 
-//#define DRM_CLOEXEC O_CLOEXEC
+//What is this?
+//const CLOEXEC = ioctl.O_CLOEXEC
 
-type drm_prime_handle struct {
-	handle,
-
-	/** Flags.. only applicable for handle->fd */
-	flags uint32
-
-	/** Returned dmabuf file descriptor */
-	fd int32
+type PrimeHandle struct {
+	Handle,
+	// Flags.. only applicable for handle->fd 
+	Flags uint32
+	// Returned dmabuf file descriptor 
+	Fd int32
 }
 
-/*
-#include "drm_mode.h"
+const IOCTL_BASE = 'd'
 
-#define DRM_IOCTL_BASE			'd'
-#define DRM_IO(nr)			_IO(DRM_IOCTL_BASE,nr)
-#define DRM_IOR(nr,type)		_IOR(DRM_IOCTL_BASE,nr,type)
-#define DRM_IOW(nr,type)		_IOW(DRM_IOCTL_BASE,nr,type)
-#define DRM_IOWR(nr,type)		_IOWR(DRM_IOCTL_BASE,nr,type)
+func IO(nr int32) int32          { return ioctl.IO(IOCTL_BASE, nr) }
+func IOR(nr, _type int32) int32  { return ioctl.IOR(IOCTL_BASE, nr, _type) }
+func IOW(nr, _type int32) int32  { return ioctl.IOW(IOCTL_BASE, nr, _type) }
+func IOWR(nr, _type int32) int32 { return ioctl.IOWR(IOCTL_BASE, nr, _type) }
 
-#define DRM_IOCTL_VERSION		DRM_IOWR(0x00, struct drm_version)
-#define DRM_IOCTL_GET_UNIQUE		DRM_IOWR(0x01, struct drm_unique)
-#define DRM_IOCTL_GET_MAGIC		DRM_IOR( 0x02, struct drm_auth)
-#define DRM_IOCTL_IRQ_BUSID		DRM_IOWR(0x03, struct drm_irq_busid)
-#define DRM_IOCTL_GET_MAP               DRM_IOWR(0x04, struct drm_map)
-#define DRM_IOCTL_GET_CLIENT            DRM_IOWR(0x05, struct drm_client)
-#define DRM_IOCTL_GET_STATS             DRM_IOR( 0x06, struct drm_stats)
-#define DRM_IOCTL_SET_VERSION		DRM_IOWR(0x07, struct drm_set_version)
-#define DRM_IOCTL_MODESET_CTL           DRM_IOW(0x08, struct drm_modeset_ctl)
-#define DRM_IOCTL_GEM_CLOSE		DRM_IOW (0x09, struct drm_gem_close)
-#define DRM_IOCTL_GEM_FLINK		DRM_IOWR(0x0a, struct drm_gem_flink)
-#define DRM_IOCTL_GEM_OPEN		DRM_IOWR(0x0b, struct drm_gem_open)
-#define DRM_IOCTL_GET_CAP		DRM_IOWR(0x0c, struct drm_get_cap)
+var (
+	IOCTL_VERSION     = IOWR(0x00, sizeof["Version"])
+	IOCTL_GET_UNIQUE  = IOWR(0x01, sizeof["Unique"])
+	IOCTL_GET_MAGIC   = IOR(0x02, sizeof["Auth"])
+	IOCTL_AUTH_MAGIC  = IOW(0x11, sizeof["Auth"])
+	IOCTL_IRQ_BUSID   = IOWR(0x03, sizeof["IrqBusId"])
+	IOCTL_GET_MAP     = IOWR(0x04, sizeof["Map"])
+	IOCTL_GET_CLIENT  = IOWR(0x05, sizeof["Client"])
+	IOCTL_GET_STATS   = IOR(0x06, sizeof["Stats"])
+	IOCTL_SET_VERSION = IOWR(0x07, sizeof["SetVersion"])
+	IOCTL_MODESET_CTL = IOW(0x08, sizeof["ModesetCtl"])
 
-#define DRM_IOCTL_SET_UNIQUE		DRM_IOW( 0x10, struct drm_unique)
-#define DRM_IOCTL_AUTH_MAGIC		DRM_IOW( 0x11, struct drm_auth)
-#define DRM_IOCTL_BLOCK			DRM_IOWR(0x12, struct drm_block)
-#define DRM_IOCTL_UNBLOCK		DRM_IOWR(0x13, struct drm_block)
-#define DRM_IOCTL_CONTROL		DRM_IOW( 0x14, struct drm_control)
-#define DRM_IOCTL_ADD_MAP		DRM_IOWR(0x15, struct drm_map)
-#define DRM_IOCTL_ADD_BUFS		DRM_IOWR(0x16, struct drm_buf_desc)
-#define DRM_IOCTL_MARK_BUFS		DRM_IOW( 0x17, struct drm_buf_desc)
-#define DRM_IOCTL_INFO_BUFS		DRM_IOWR(0x18, struct drm_buf_info)
-#define DRM_IOCTL_MAP_BUFS		DRM_IOWR(0x19, struct drm_buf_map)
-#define DRM_IOCTL_FREE_BUFS		DRM_IOW( 0x1a, struct drm_buf_free)
+	IOCTL_GEM_CLOSE = IOW(0x09, sizeof["GemClose"])
+	IOCTL_GEM_FLINK = IOWR(0x0a, sizeof["GemFlink"])
+	IOCTL_GEM_OPEN  = IOWR(0x0b, sizeof["GemOpen"])
 
-#define DRM_IOCTL_RM_MAP		DRM_IOW( 0x1b, struct drm_map)
+	IOCTL_GET_CAP    = IOWR(0x0c, sizeof["GetCap"])
+	IOCTL_SET_UNIQUE = IOW(0x10, sizeof["Unique"])
 
-#define DRM_IOCTL_SET_SAREA_CTX		DRM_IOW( 0x1c, struct drm_ctx_priv_map)
-#define DRM_IOCTL_GET_SAREA_CTX 	DRM_IOWR(0x1d, struct drm_ctx_priv_map)
+	IOCTL_BLOCK   = IOWR(0x12, sizeof["Block"])
+	IOCTL_UNBLOCK = IOWR(0x13, sizeof["Block"])
 
-#define DRM_IOCTL_SET_MASTER            DRM_IO(0x1e)
-#define DRM_IOCTL_DROP_MASTER           DRM_IO(0x1f)
+	IOCTL_SET_MASTER  = IO(0x1e)
+	IOCTL_DROP_MASTER = IO(0x1f)
 
-#define DRM_IOCTL_ADD_CTX		DRM_IOWR(0x20, struct drm_ctx)
-#define DRM_IOCTL_RM_CTX		DRM_IOWR(0x21, struct drm_ctx)
-#define DRM_IOCTL_MOD_CTX		DRM_IOW( 0x22, struct drm_ctx)
-#define DRM_IOCTL_GET_CTX		DRM_IOWR(0x23, struct drm_ctx)
-#define DRM_IOCTL_SWITCH_CTX		DRM_IOW( 0x24, struct drm_ctx)
-#define DRM_IOCTL_NEW_CTX		DRM_IOW( 0x25, struct drm_ctx)
-#define DRM_IOCTL_RES_CTX		DRM_IOWR(0x26, struct drm_ctx_res)
-#define DRM_IOCTL_ADD_DRAW		DRM_IOWR(0x27, struct drm_draw)
-#define DRM_IOCTL_RM_DRAW		DRM_IOWR(0x28, struct drm_draw)
-#define DRM_IOCTL_DMA			DRM_IOWR(0x29, struct drm_dma)
-#define DRM_IOCTL_LOCK			DRM_IOW( 0x2a, struct drm_lock)
-#define DRM_IOCTL_UNLOCK		DRM_IOW( 0x2b, struct drm_lock)
-#define DRM_IOCTL_FINISH		DRM_IOW( 0x2c, struct drm_lock)
+	IOCTL_CONTROL = IOW(0x14, sizeof["Control"])
 
-#define DRM_IOCTL_PRIME_HANDLE_TO_FD    DRM_IOWR(0x2d, struct drm_prime_handle)
-#define DRM_IOCTL_PRIME_FD_TO_HANDLE    DRM_IOWR(0x2e, struct drm_prime_handle)
+	IOCTL_ADD_MAP   = IOWR(0x15, sizeof["Map"])
+	IOCTL_ADD_BUFS  = IOWR(0x16, sizeof["BufDesc"])
+	IOCTL_MARK_BUFS = IOW(0x17, sizeof["BufDesc"])
+	IOCTL_INFO_BUFS = IOWR(0x18, sizeof["BufInfo"])
+	IOCTL_MAP_BUFS  = IOWR(0x19, sizeof["BufMap"])
+	IOCTL_FREE_BUFS = IOW(0x1a, sizeof["BufFree"])
+	IOCTL_RM_MAP    = IOW(0x1b, sizeof["Map"])
 
-#define DRM_IOCTL_AGP_ACQUIRE		DRM_IO(  0x30)
-#define DRM_IOCTL_AGP_RELEASE		DRM_IO(  0x31)
-#define DRM_IOCTL_AGP_ENABLE		DRM_IOW( 0x32, struct drm_agp_mode)
-#define DRM_IOCTL_AGP_INFO		DRM_IOR( 0x33, struct drm_agp_info)
-#define DRM_IOCTL_AGP_ALLOC		DRM_IOWR(0x34, struct drm_agp_buffer)
-#define DRM_IOCTL_AGP_FREE		DRM_IOW( 0x35, struct drm_agp_buffer)
-#define DRM_IOCTL_AGP_BIND		DRM_IOW( 0x36, struct drm_agp_binding)
-#define DRM_IOCTL_AGP_UNBIND		DRM_IOW( 0x37, struct drm_agp_binding)
+	IOCTL_SET_SAREA_CTX = IOW(0x1c, sizeof["CtxPrivMap"])
+	IOCTL_GET_SAREA_CTX = IOWR(0x1d, sizeof["CtxPrivMap"])
+	IOCTL_ADD_CTX       = IOWR(0x20, sizeof["Ctx"])
+	IOCTL_RM_CTX        = IOWR(0x21, sizeof["Ctx"])
+	IOCTL_MOD_CTX       = IOW(0x22, sizeof["Ctx"])
+	IOCTL_GET_CTX       = IOWR(0x23, sizeof["Ctx"])
+	IOCTL_SWITCH_CTX    = IOW(0x24, sizeof["Ctx"])
+	IOCTL_NEW_CTX       = IOW(0x25, sizeof["Ctx"])
+	IOCTL_RES_CTX       = IOWR(0x26, sizeof["CtxRes"])
 
-#define DRM_IOCTL_SG_ALLOC		DRM_IOWR(0x38, struct drm_scatter_gather)
-#define DRM_IOCTL_SG_FREE		DRM_IOW( 0x39, struct drm_scatter_gather)
+	IOCTL_ADD_DRAW = IOWR(0x27, sizeof["Draw"])
+	IOCTL_RM_DRAW  = IOWR(0x28, sizeof["Draw"])
+	IOCTL_DMA      = IOWR(0x29, sizeof["Dma"])
 
-#define DRM_IOCTL_WAIT_VBLANK		DRM_IOWR(0x3a, union drm_wait_vblank)
+	IOCTL_LOCK   = IOW(0x2a, sizeof["Lock"])
+	IOCTL_UNLOCK = IOW(0x2b, sizeof["Lock"])
+	IOCTL_FINISH = IOW(0x2c, sizeof["Lock"])
 
-#define DRM_IOCTL_UPDATE_DRAW		DRM_IOW(0x3f, struct drm_update_draw)
+	IOCTL_PRIME_HANDLE_TO_FD = IOWR(0x2d, sizeof["PrimeHandle"])
+	IOCTL_PRIME_FD_TO_HANDLE = IOWR(0x2e, sizeof["PrimeHandle"])
 
-#define DRM_IOCTL_MODE_GETRESOURCES	DRM_IOWR(0xA0, struct drm_mode_card_res)
-#define DRM_IOCTL_MODE_GETCRTC		DRM_IOWR(0xA1, struct drm_mode_crtc)
-#define DRM_IOCTL_MODE_SETCRTC		DRM_IOWR(0xA2, struct drm_mode_crtc)
-#define DRM_IOCTL_MODE_CURSOR		DRM_IOWR(0xA3, struct drm_mode_cursor)
-#define DRM_IOCTL_MODE_GETGAMMA		DRM_IOWR(0xA4, struct drm_mode_crtc_lut)
-#define DRM_IOCTL_MODE_SETGAMMA		DRM_IOWR(0xA5, struct drm_mode_crtc_lut)
-#define DRM_IOCTL_MODE_GETENCODER	DRM_IOWR(0xA6, struct drm_mode_get_encoder)
-#define DRM_IOCTL_MODE_GETCONNECTOR	DRM_IOWR(0xA7, struct drm_mode_get_connector)
-#define DRM_IOCTL_MODE_ATTACHMODE	DRM_IOWR(0xA8, struct drm_mode_mode_cmd)
-#define DRM_IOCTL_MODE_DETACHMODE	DRM_IOWR(0xA9, struct drm_mode_mode_cmd)
+	IOCTL_AGP_ACQUIRE = IO(0x30)
+	IOCTL_AGP_RELEASE = IO(0x31)
+	IOCTL_AGP_ENABLE  = IOW(0x32, sizeof["AgpMode"])
+	IOCTL_AGP_INFO    = IOR(0x33, sizeof["AgpInfo"])
+	IOCTL_AGP_ALLOC   = IOWR(0x34, sizeof["AgpBuffer"])
+	IOCTL_AGP_FREE    = IOW(0x35, sizeof["AgpBuffer"])
+	IOCTL_AGP_BIND    = IOW(0x36, sizeof["AgpBinding"])
+	IOCTL_AGP_UNBIND  = IOW(0x37, sizeof["AgpBinding"])
 
-#define DRM_IOCTL_MODE_GETPROPERTY	DRM_IOWR(0xAA, struct drm_mode_get_property)
-#define DRM_IOCTL_MODE_SETPROPERTY	DRM_IOWR(0xAB, struct drm_mode_connector_set_property)
-#define DRM_IOCTL_MODE_GETPROPBLOB	DRM_IOWR(0xAC, struct drm_mode_get_blob)
-#define DRM_IOCTL_MODE_GETFB		DRM_IOWR(0xAD, struct drm_mode_fb_cmd)
-#define DRM_IOCTL_MODE_ADDFB		DRM_IOWR(0xAE, struct drm_mode_fb_cmd)
-#define DRM_IOCTL_MODE_RMFB		DRM_IOWR(0xAF, unsigned int)
-#define DRM_IOCTL_MODE_PAGE_FLIP	DRM_IOWR(0xB0, struct drm_mode_crtc_page_flip)
-#define DRM_IOCTL_MODE_DIRTYFB		DRM_IOWR(0xB1, struct drm_mode_fb_dirty_cmd)
+	IOCTL_SG_ALLOC = IOWR(0x38, sizeof["ScatterGather"])
+	IOCTL_SG_FREE  = IOW(0x39, sizeof["ScatterGather"])
 
-#define DRM_IOCTL_MODE_CREATE_DUMB DRM_IOWR(0xB2, struct drm_mode_create_dumb)
-#define DRM_IOCTL_MODE_MAP_DUMB    DRM_IOWR(0xB3, struct drm_mode_map_dumb)
-#define DRM_IOCTL_MODE_DESTROY_DUMB    DRM_IOWR(0xB4, struct drm_mode_destroy_dumb)
-#define DRM_IOCTL_MODE_GETPLANERESOURCES DRM_IOWR(0xB5, struct drm_mode_get_plane_res)
-#define DRM_IOCTL_MODE_GETPLANE	DRM_IOWR(0xB6, struct drm_mode_get_plane)
-#define DRM_IOCTL_MODE_SETPLANE	DRM_IOWR(0xB7, struct drm_mode_set_plane)
-#define DRM_IOCTL_MODE_ADDFB2		DRM_IOWR(0xB8, struct drm_mode_fb_cmd2)
-#define DRM_IOCTL_MODE_OBJ_GETPROPERTIES	DRM_IOWR(0xB9, struct drm_mode_obj_get_properties)
-#define DRM_IOCTL_MODE_OBJ_SETPROPERTY	DRM_IOWR(0xBA, struct drm_mode_obj_set_property)
-*/
-/**
- * Device specific ioctls should only be in their respective headers
- * The device specific ioctl range is from 0x40 to 0x99.
- * Generic IOCTLS restart at 0xA0.
- *
- * \sa drmCommandNone(), drmCommandRead(), drmCommandWrite(), and
- * drmCommandReadWrite().
- */
-/*
-#define DRM_COMMAND_BASE                0x40
-#define DRM_COMMAND_END			0xA0
-*/
+	IOCTL_WAIT_VBLANK = IOWR(0x3a, sizeof["WaitVblank"])
+	IOCTL_UPDATE_DRAW = IOW(0x3f, sizeof["UpdateDraw"])
+
+	IOCTL_MODE_GETRESOURCES      = IOWR(0xA0, sizeof["ModeCardRes"])
+	IOCTL_MODE_GETCRTC           = IOWR(0xA1, sizeof["ModeCrtc"])
+	IOCTL_MODE_SETCRTC           = IOWR(0xA2, sizeof["ModeCrtc"])
+	IOCTL_MODE_CURSOR            = IOWR(0xA3, sizeof["ModeCursor"])
+	IOCTL_MODE_GETGAMMA          = IOWR(0xA4, sizeof["ModeCrtcLut"])
+	IOCTL_MODE_SETGAMMA          = IOWR(0xA5, sizeof["ModeCrtcLut"])
+	IOCTL_MODE_GETENCODER        = IOWR(0xA6, sizeof["ModeGetEncoder"])
+	IOCTL_MODE_GETCONNECTOR      = IOWR(0xA7, sizeof["ModeGetConnector"])
+	IOCTL_MODE_ATTACHMODE        = IOWR(0xA8, sizeof["ModeModeCmd"])
+	IOCTL_MODE_DETACHMODE        = IOWR(0xA9, sizeof["ModeModeCmd"])
+	IOCTL_MODE_GETPROPERTY       = IOWR(0xAA, sizeof["ModeGetProperty"])
+	IOCTL_MODE_SETPROPERTY       = IOWR(0xAB, sizeof["ModeConnectorSetProperty"])
+	IOCTL_MODE_GETPROPBLOB       = IOWR(0xAC, sizeof["ModeGetBlob"])
+	IOCTL_MODE_GETFB             = IOWR(0xAD, sizeof["ModeFbCmd"])
+	IOCTL_MODE_ADDFB             = IOWR(0xAE, sizeof["ModeFbCmd"])
+	IOCTL_MODE_RMFB              = IOWR(0xAF, int32(4))
+	IOCTL_MODE_PAGE_FLIP         = IOWR(0xB0, sizeof["ModeCrtcPageFlip"])
+	IOCTL_MODE_DIRTYFB           = IOWR(0xB1, sizeof["ModeFbDirtyCmd"])
+	IOCTL_MODE_CREATE_DUMB       = IOWR(0xB2, sizeof["ModeCreateDumb"])
+	IOCTL_MODE_MAP_DUMB          = IOWR(0xB3, sizeof["ModeMapDumb"])
+	IOCTL_MODE_DESTROY_DUMB      = IOWR(0xB4, sizeof["ModeDestroyDumb"])
+	IOCTL_MODE_GETPLANERESOURCES = IOWR(0xB5, sizeof["ModeGetPlaneRes"])
+	IOCTL_MODE_GETPLANE          = IOWR(0xB6, sizeof["ModeGetPlane"])
+	IOCTL_MODE_SETPLANE          = IOWR(0xB7, sizeof["ModeSetPlane"])
+	IOCTL_MODE_ADDFB2            = IOWR(0xB8, sizeof["ModeFbCmd2"])
+	IOCTL_MODE_OBJ_GETPROPERTIES = IOWR(0xB9, sizeof["ModeObjGetProperties"])
+	IOCTL_MODE_OBJ_SETPROPERTY   = IOWR(0xBA, sizeof["ModeObjSetProperty"])
+)
+
+/*Device specific ioctls should only be in their respective headers
+  The device specific ioctl range is from 0x40 to 0x99.
+  Generic IOCTLS restart at 0xA0. 
+  [drmCommandNone(), drmCommandRead(), 
+  drmCommandWrite(),drmCommandReadWrite()].*/
+const (
+	COMMAND_BASE = 0x40
+	COMMAND_END  = 0xA0
+)
+
 /**
  * Header for events written back to userspace on the drm fd.  The
  * type defines the type of event, the length specifies the total
@@ -695,74 +724,34 @@ type drm_prime_handle struct {
  * Event types 0 - 0x7fffffff are generic drm events, 0x80000000 and
  * up are chipset specific.
  */
-/*
-struct drm_event {
-	__u32 type
-	__u32 length
+
+type Event struct {
+	Type,
+	Length uint32
 }
 
-#define DRM_EVENT_VBLANK 0x01
-#define DRM_EVENT_FLIP_COMPLETE 0x02
+const (
+	EVENT_VBLANK        = 0x01
+	EVENT_FLIP_COMPLETE = 0x02
+)
 
-struct drm_event_vblank {
-	struct drm_event base
-	__u64 user_data
-	__u32 tv_sec
-	__u32 tv_usec
-	__u32 sequence
-	__u32 reserved
+type EventVblank struct {
+	EventBase struct {
+		UserData uint64
+		TvSec,
+		TvUsec,
+		Sequence,
+		Reserved uint32
+	}
 }
 
-#define DRM_CAP_DUMB_BUFFER 0x1
-#define DRM_CAP_VBLANK_HIGH_CRTC   0x2
-#define DRM_CAP_DUMB_PREFERRED_DEPTH 0x3
-#define DRM_CAP_DUMB_PREFER_SHADOW 0x4
-#define DRM_CAP_PRIME 0x5
+const (
+	CAP_DUMB_BUFFER          = 0x1
+	CAP_VBLANK_HIGH_CRTC     = 0x2
+	CAP_DUMB_PREFERRED_DEPTH = 0x3
+	CAP_DUMB_PREFER_SHADOW   = 0x4
+	CAP_PRIME                = 0x5
 
-#define DRM_PRIME_CAP_IMPORT 0x1
-#define DRM_PRIME_CAP_EXPORT 0x2
-*/
-/* typedef area */
-/*
-typedef struct drm_clip_rect drm_clip_rect_t
-typedef struct drm_drawable_info drm_drawable_info_t
-typedef struct drm_tex_region drm_tex_region_t
-typedef struct drm_hw_lock drm_hw_lock_t
-typedef struct drm_version drm_version_t
-typedef struct drm_unique drm_unique_t
-typedef struct drm_list drm_list_t
-typedef struct drm_block drm_block_t
-typedef struct drm_control drm_control_t
-typedef enum drm_map_type drm_map_type_t
-typedef enum drm_map_flags drm_map_flags_t
-typedef struct drm_ctx_priv_map drm_ctx_priv_map_t
-typedef struct drm_map drm_map_t
-typedef struct drm_client drm_client_t
-typedef enum drm_stat_type drm_stat_type_t
-typedef struct drm_stats drm_stats_t
-typedef enum drm_lock_flags drm_lock_flags_t
-typedef struct drm_lock drm_lock_t
-typedef enum drm_dma_flags drm_dma_flags_t
-typedef struct drm_buf_desc drm_buf_desc_t
-typedef struct drm_buf_info drm_buf_info_t
-typedef struct drm_buf_free drm_buf_free_t
-typedef struct drm_buf_pub drm_buf_pub_t
-typedef struct drm_buf_map drm_buf_map_t
-typedef struct drm_dma drm_dma_t
-typedef union drm_wait_vblank drm_wait_vblank_t
-typedef struct drm_agp_mode drm_agp_mode_t
-typedef enum drm_ctx_flags drm_ctx_flags_t
-typedef struct drm_ctx drm_ctx_t
-typedef struct drm_ctx_res drm_ctx_res_t
-typedef struct drm_draw drm_draw_t
-typedef struct drm_update_draw drm_update_draw_t
-typedef struct drm_auth drm_auth_t
-typedef struct drm_irq_busid drm_irq_busid_t
-typedef enum drm_vblank_seq_type drm_vblank_seq_type_t
-
-typedef struct drm_agp_buffer drm_agp_buffer_t
-typedef struct drm_agp_binding drm_agp_binding_t
-typedef struct drm_agp_info drm_agp_info_t
-typedef struct drm_scatter_gather drm_scatter_gather_t
-typedef struct drm_set_version drm_set_version_t
-*/
+	PRIME_CAP_IMPORT = 0x1
+	PRIME_CAP_EXPORT = 0x2
+)

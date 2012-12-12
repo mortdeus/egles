@@ -28,24 +28,24 @@ func Call(fd uintptr, name int, data unsafe.Pointer) syscall.Errno {
  * below from now on.
  */
 const (
-	NRBITS   = 0x8
-	TYPEBITS = 0x8
+	NRBITS   = 8
+	TYPEBITS = 8
 
 	/*
 	 * Let any architecture override either of the following before
 	 * including this file.
 	 */
 
-	SIZEBITS = 0xd
+	SIZEBITS = 14
 
-	DIRBITS = 0x2
+	DIRBITS = 2
 
 	NRMASK   = (1 << NRBITS) - 1
 	TYPEMASK = (1 << TYPEBITS) - 1
 	SIZEMASK = (1 << SIZEBITS) - 1
 	DIRMASK  = (1 << DIRBITS) - 1
 
-	NRSHIFT   = 0x0
+	NRSHIFT   = 0
 	TYPESHIFT = NRSHIFT + NRBITS
 	SIZESHIFT = TYPESHIFT + TYPEBITS
 	DIRSHIFT  = SIZESHIFT + SIZEBITS
