@@ -1,4 +1,4 @@
-/*mortdeus.mit-license.org
+/*
 A cross platform egl wrapper for golang.  
 */
 package egles
@@ -11,3 +11,5 @@ GLES wrappers 		  0% 		done
 
 */
 type Documentation int
+
+const License = "mortdeus.mit-license.org"
