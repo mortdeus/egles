@@ -869,3 +869,34 @@ const (
 	FORMAT_YUV444      = 0x34325559
 	FORMAT_YVU444      = 0x34325659
 )
+
+const (
+	SAREA_MAX = 0x2000
+
+	SAREA_MAX_DRAWABLES = 0x100
+
+	SAREA_DRAWABLE_CLAIMED_ENTRY = 0x80000000
+)
+
+type (
+	SareaDrawable struct {
+		Stamp uint32
+		Flags uint32
+	}
+
+	SareaFrame struct {
+		X          uint32
+		Y          uint32
+		Width      uint32
+		Height     uint32
+		Fullscreen uint32
+	}
+
+	Sarea struct {
+		Lock          HwLock
+		Drawable_lock HwLock
+		DrawableTable [256]SareaDrawable
+		Frame         SareaFrame
+		Dummy_context uint32
+	}
+)

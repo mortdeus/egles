@@ -9,6 +9,7 @@ package drm
 //#include <libdrm/drm.h>
 //#include <libdrm/drm_mode.h>
 //#include <libdrm/drm_fourcc.h>
+//#include <libdrm/drm_sarea.h>
 import "C"
 import "syscall"
 
@@ -527,4 +528,24 @@ const (
 	FORMAT_YVU422      = C.DRM_FORMAT_YVU422
 	FORMAT_YUV444      = C.DRM_FORMAT_YUV444
 	FORMAT_YVU444      = C.DRM_FORMAT_YVU444
+)
+
+//drm_sarea.h
+
+const (
+	SAREA_MAX = C.SAREA_MAX
+
+	SAREA_MAX_DRAWABLES = C.SAREA_MAX_DRAWABLES
+
+	SAREA_DRAWABLE_CLAIMED_ENTRY = C.SAREA_DRAWABLE_CLAIMED_ENTRY
+)
+
+type (
+	SareaDrawable C.struct_drm_sarea_drawable
+
+	/** SAREA frame */
+	SareaFrame C.struct_drm_sarea_frame
+
+	/** SAREA */
+	Sarea C.struct_drm_sarea
 )
