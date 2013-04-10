@@ -1,5 +1,4 @@
 // +build ignore
-
 package drm
 
 //#include <linux/types.h>
@@ -146,7 +145,218 @@ const (
 	PRE_MODESET       = C._DRM_PRE_MODESET
 	POST_MODESET      = C._DRM_POST_MODESET
 	//CLOEXEC           = C.DRM_CLOEXEC
+)
 
+//drm_mode.h
+const (
+	DISPLAY_INFO_LEN   = C.DRM_DISPLAY_INFO_LEN
+	CONNECTOR_NAME_LEN = C.DRM_CONNECTOR_NAME_LEN
+	DISPLAY_MODE_LEN   = C.DRM_DISPLAY_MODE_LEN
+	PROP_NAME_LEN      = C.DRM_PROP_NAME_LEN
+
+	MODE_TYPE_BUILTIN   = C.DRM_MODE_TYPE_BUILTIN
+	MODE_TYPE_CLOCK_C   = C.DRM_MODE_TYPE_CLOCK_C
+	MODE_TYPE_CRTC_C    = C.DRM_MODE_TYPE_CRTC_C
+	MODE_TYPE_PREFERRED = C.DRM_MODE_TYPE_PREFERRED
+	MODE_TYPE_DEFAULT   = C.DRM_MODE_TYPE_DEFAULT
+	MODE_TYPE_USERDEF   = C.DRM_MODE_TYPE_USERDEF
+	MODE_TYPE_DRIVER    = C.DRM_MODE_TYPE_DRIVER
+
+	/* Video mode flags */
+
+	// bit compatible with the xorg definitions. 
+	MODE_FLAG_PHSYNC    = C.DRM_MODE_FLAG_PHSYNC
+	MODE_FLAG_NHSYNC    = C.DRM_MODE_FLAG_NHSYNC
+	MODE_FLAG_PVSYNC    = C.DRM_MODE_FLAG_PVSYNC
+	MODE_FLAG_NVSYNC    = C.DRM_MODE_FLAG_NVSYNC
+	MODE_FLAG_INTERLACE = C.DRM_MODE_FLAG_INTERLACE
+	MODE_FLAG_DBLSCAN   = C.DRM_MODE_FLAG_DBLSCAN
+	MODE_FLAG_CSYNC     = C.DRM_MODE_FLAG_CSYNC
+	MODE_FLAG_PCSYNC    = C.DRM_MODE_FLAG_PCSYNC
+	MODE_FLAG_NCSYNC    = C.DRM_MODE_FLAG_NCSYNC
+
+	// hskew provided 
+	MODE_FLAG_HSKEW   = C.DRM_MODE_FLAG_HSKEW
+	MODE_FLAG_BCAST   = C.DRM_MODE_FLAG_BCAST
+	MODE_FLAG_PIXMUX  = C.DRM_MODE_FLAG_PIXMUX
+	MODE_FLAG_DBLCLK  = C.DRM_MODE_FLAG_DBLCLK
+	MODE_FLAG_CLKDIV2 = C.DRM_MODE_FLAG_CLKDIV2
+
+	/* DPMS flags */
+	// bit compatible with the xorg definitions. 
+	MODE_DPMS_ON      = C.DRM_MODE_DPMS_ON
+	MODE_DPMS_STANDBY = C.DRM_MODE_DPMS_STANDBY
+	MODE_DPMS_SUSPEND = C.DRM_MODE_DPMS_SUSPEND
+	MODE_DPMS_OFF     = C.DRM_MODE_DPMS_OFF
+
+	/* Scaling mode options */
+	// Unmodified timing (display or software can still scale) 
+	MODE_SCALE_NONE = C.DRM_MODE_SCALE_NONE
+	// Full screen, ignore aspect 
+	MODE_SCALE_FULLSCREEN = C.DRM_MODE_SCALE_FULLSCREEN
+	// Centered, no scaling 
+	MODE_SCALE_CENTER = C.DRM_MODE_SCALE_CENTER
+	// Full screen, preserve aspect 
+	MODE_SCALE_ASPECT = C.DRM_MODE_SCALE_ASPECT
+
+	/* Dithering mode options */
+	MODE_DITHERING_OFF  = C.DRM_MODE_DITHERING_OFF
+	MODE_DITHERING_ON   = C.DRM_MODE_DITHERING_ON
+	MODE_DITHERING_AUTO = C.DRM_MODE_DITHERING_AUTO
+
+	/* Dirty info options */
+	MODE_DIRTY_OFF      = C.DRM_MODE_DIRTY_OFF
+	MODE_DIRTY_ON       = C.DRM_MODE_DIRTY_ON
+	MODE_DIRTY_ANNOTATE = C.DRM_MODE_DIRTY_ANNOTATE
+)
+
+type (
+	ModeModeInfo C.struct_drm_mode_modeinfo
+	ModeCardRes  C.struct_drm_mode_card_res
+	ModeCrtc     C.struct_drm_mode_crtc
+)
+
+const (
+	MODE_PRESENT_TOP_FIELD    = C.DRM_MODE_PRESENT_TOP_FIELD
+	MODE_PRESENT_BOTTOM_FIELD = C.DRM_MODE_PRESENT_BOTTOM_FIELD
+)
+
+type (
+	/* Planes blend with or override other bits on the CRTC */
+	ModeSetPlane    C.struct_drm_mode_set_plane
+	ModeGetPlane    C.struct_drm_mode_get_plane
+	ModeGetPlaneRes C.struct_drm_mode_get_plane_res
+)
+
+const (
+	MODE_ENCODER_NONE  = C.DRM_MODE_ENCODER_NONE
+	MODE_ENCODER_DAC   = C.DRM_MODE_ENCODER_DAC
+	MODE_ENCODER_TMDS  = C.DRM_MODE_ENCODER_TMDS
+	MODE_ENCODER_LVDS  = C.DRM_MODE_ENCODER_LVDS
+	MODE_ENCODER_TVDAC = C.DRM_MODE_ENCODER_TVDAC
+)
+
+type ModeGetEncoder C.struct_drm_mode_get_encoder
+
+/* 
+This is for connectors with multiple signal types. 
+Try to match DRM_MODE_CONNECTOR_X as closely as possible. 
+*/
+const (
+	MODE_SUBCONNECTOR_Automatic = C.DRM_MODE_SUBCONNECTOR_Automatic
+	MODE_SUBCONNECTOR_Unknown   = C.DRM_MODE_SUBCONNECTOR_Unknown
+	MODE_SUBCONNECTOR_DVID      = C.DRM_MODE_SUBCONNECTOR_DVID
+	MODE_SUBCONNECTOR_DVIA      = C.DRM_MODE_SUBCONNECTOR_DVIA
+	MODE_SUBCONNECTOR_Composite = C.DRM_MODE_SUBCONNECTOR_Composite
+	MODE_SUBCONNECTOR_SVIDEO    = C.DRM_MODE_SUBCONNECTOR_SVIDEO
+	MODE_SUBCONNECTOR_Component = C.DRM_MODE_SUBCONNECTOR_Component
+	MODE_SUBCONNECTOR_SCART     = C.DRM_MODE_SUBCONNECTOR_SCART
+
+	MODE_CONNECTOR_Unknown     = C.DRM_MODE_CONNECTOR_Unknown
+	MODE_CONNECTOR_VGA         = C.DRM_MODE_CONNECTOR_VGA
+	MODE_CONNECTOR_DVII        = C.DRM_MODE_CONNECTOR_DVII
+	MODE_CONNECTOR_DVID        = C.DRM_MODE_CONNECTOR_DVID
+	MODE_CONNECTOR_DVIA        = C.DRM_MODE_CONNECTOR_DVIA
+	MODE_CONNECTOR_Composite   = C.DRM_MODE_CONNECTOR_Composite
+	MODE_CONNECTOR_SVIDEO      = C.DRM_MODE_CONNECTOR_SVIDEO
+	MODE_CONNECTOR_LVDS        = C.DRM_MODE_CONNECTOR_LVDS
+	MODE_CONNECTOR_Component   = C.DRM_MODE_CONNECTOR_Component
+	MODE_CONNECTOR_9PinDIN     = C.DRM_MODE_CONNECTOR_9PinDIN
+	MODE_CONNECTOR_DisplayPort = C.DRM_MODE_CONNECTOR_DisplayPort
+	MODE_CONNECTOR_HDMIA       = C.DRM_MODE_CONNECTOR_HDMIA
+	MODE_CONNECTOR_HDMIB       = C.DRM_MODE_CONNECTOR_HDMIB
+	MODE_CONNECTOR_TV          = C.DRM_MODE_CONNECTOR_TV
+	MODE_CONNECTOR_eDP         = C.DRM_MODE_CONNECTOR_eDP
+)
+
+type ModeGetConnector C.struct_drm_mode_get_connector
+
+const (
+	MODE_PROP_PENDING   = C.DRM_MODE_PROP_PENDING
+	MODE_PROP_RANGE     = C.DRM_MODE_PROP_RANGE
+	MODE_PROP_IMMUTABLE = C.DRM_MODE_PROP_IMMUTABLE
+	// enumerated type with text strings */
+	MODE_PROP_ENUM = C.DRM_MODE_PROP_ENUM
+	MODE_PROP_BLOB = C.DRM_MODE_PROP_BLOB
+	// bitmask of enumerated types */
+	MODE_PROP_BITMASK = C.DRM_MODE_PROP_BITMASK
+)
+
+type (
+	ModePropertyEnum         C.struct_drm_mode_property_enum
+	ModeGetProperty          C.struct_drm_mode_get_property
+	ModeConnectorSetProperty C.struct_drm_mode_connector_set_property
+)
+
+const (
+	MODE_OBJECT_CRTC      = C.DRM_MODE_OBJECT_CRTC
+	MODE_OBJECT_CONNECTOR = C.DRM_MODE_OBJECT_CONNECTOR
+	MODE_OBJECT_ENCODER   = C.DRM_MODE_OBJECT_ENCODER
+	MODE_OBJECT_MODE      = C.DRM_MODE_OBJECT_MODE
+	MODE_OBJECT_PROPERTY  = C.DRM_MODE_OBJECT_PROPERTY
+	MODE_OBJECT_FB        = C.DRM_MODE_OBJECT_FB
+	MODE_OBJECT_BLOB      = C.DRM_MODE_OBJECT_BLOB
+	MODE_OBJECT_PLANE     = C.DRM_MODE_OBJECT_PLANE
+)
+
+type (
+	ModeObjGetProperties C.struct_drm_mode_obj_get_properties
+
+	ModeObjSetProperty C.struct_drm_mode_obj_set_property
+
+	ModeGetBlob C.struct_drm_mode_get_blob
+
+	ModeFbCmd C.struct_drm_mode_fb_cmd
+)
+
+// for interlaced framebuffers */
+const MODE_FB_INTERLACED = C.DRM_MODE_FB_INTERLACED
+
+type ModeFbCmd2 C.struct_drm_mode_fb_cmd2
+
+const (
+	MODE_FB_DIRTY_ANNOTATE_COPY = C.DRM_MODE_FB_DIRTY_ANNOTATE_COPY
+	MODE_FB_DIRTY_ANNOTATE_FILL = C.DRM_MODE_FB_DIRTY_ANNOTATE_FILL
+	MODE_FB_DIRTY_FLAGS         = C.DRM_MODE_FB_DIRTY_FLAGS
+)
+
+type ModeFbDirtyCmd C.struct_drm_mode_fb_dirty_cmd
+
+type ModeModeCmd C.struct_drm_mode_mode_cmd
+
+const (
+	MODE_CURSOR_BO   = C.DRM_MODE_CURSOR_BO
+	MODE_CURSOR_MOVE = C.DRM_MODE_CURSOR_MOVE
+)
+
+/* 
+depending on the value in flags diffrent members are used.
+CURSOR_BO uses crtc width height handle - if 0 turns the cursor of
+CURSOR_MOVE uses crtc x y
+*/
+type (
+	ModeCursor  C.struct_drm_mode_cursor
+	ModeCrtcLut C.struct_drm_mode_crtc_lut
+)
+
+const (
+	MODE_PAGE_FLIP_EVENT = C.DRM_MODE_PAGE_FLIP_EVENT
+	MODE_PAGE_FLIP_FLAGS = C.DRM_MODE_PAGE_FLIP_FLAGS
+)
+
+type (
+	ModeCrtcPageFlip C.struct_drm_mode_crtc_page_flip
+
+	// create a dumb scanout buffer */
+	ModeCreateDumb C.struct_drm_mode_create_dumb
+
+	// set up for mmap of a dumb scanout buffer */
+	ModeMapDumb C.struct_drm_mode_map_dumb
+
+	ModeDestroyDumb C.struct_drm_mode_destroy_dumb
+)
+
+const (
 	IOCTL_BASE                   = C.DRM_IOCTL_BASE
 	IOCTL_VERSION                = C.DRM_IOCTL_VERSION
 	IOCTL_GET_UNIQUE             = C.DRM_IOCTL_GET_UNIQUE
