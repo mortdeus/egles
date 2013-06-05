@@ -23,11 +23,11 @@ var (
 `
 )
 
-func FragmentShader(s string) gl.Uint {
+func FragmentShader(s string) uint32 {
 	shader := gl.CreateShader(gl.FRAGMENT_SHADER)
 	gl.ShaderSource(shader, 1, &s, nil)
 	gl.CompileShader(shader)
-	var stat gl.Int
+	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
 	if stat != 0 {
 		log.Fatalln(stat)
@@ -36,12 +36,12 @@ func FragmentShader(s string) gl.Uint {
 
 }
 
-func VertexShader(s string) gl.Uint {
+func VertexShader(s string) uint32 {
 
 	shader := gl.CreateShader(gl.VERTEX_SHADER)
 	gl.ShaderSource(shader, 1, &s, nil)
 	gl.CompileShader(shader)
-	var stat gl.Int
+	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
 	if stat != 0 {
 		log.Fatalln(stat)
@@ -49,12 +49,12 @@ func VertexShader(s string) gl.Uint {
 	return shader
 }
 
-func Program(fsh, vsh gl.Uint) gl.Uint {
+func Program(fsh, vsh uint32) uint32 {
 	p := gl.CreateProgram()
 	gl.AttachShader(p, fsh)
 	gl.AttachShader(p, vsh)
 	gl.LinkProgram(p)
-	var stat gl.Int
+	var stat int32
 	gl.GetProgramiv(p, gl.LINK_STATUS, &stat)
 
 	if stat != 0 {

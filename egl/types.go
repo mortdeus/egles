@@ -5,9 +5,12 @@ package egl
 #include <stdlib.h>
 #include <EGL/egl.h>
 #include <EGL/eglplatform.h>
+#include <EGL/eglext.h>
+
+const NativeDisplayType EGLDefaultDisplay = EGL_DEFAULT_DISPLAY;
+const EGLDisplay EGLNoDisplay = EGL_NO_DISPLAY;
 */
 import "C"
-import "unsafe"
 
 type (
 	Enum              uint32
@@ -16,10 +19,13 @@ type (
 	Display           uintptr
 	Surface           uintptr
 	ClientBuffer      uintptr
-	NativeDisplayType unsafe.Pointer
-	NativeWindowType  unsafe.Pointer
-	NativePixmapType  unsafe.Pointer
+	NativeDisplayType C.NativeDisplayType
+	NativeWindowType  C.NativeWindowType
+	NativePixmapType  C.NativePixmapType
 )
+
+var DefaultDisplay = C.EGLDefaultDisplay
+var NoDisplay = C.EGLNoDisplay
 
 func goBoolean(n C.EGLBoolean) bool {
 	return n == 1

@@ -24,10 +24,9 @@ const (
 	//TRUE  = 1
 
 	/* Out-of-band handle values */
-	DEFAULT_DISPLAY = 0
-	NO_CONTEXT      = 0
-	NO_DISPLAY      = 0
-	NO_SURFACE      = 0
+
+	NoContext = Context(0)
+	NoSurface = Surface(0)
 
 	/* Out-of-band attribute value */
 	DONT_CARE = -1
