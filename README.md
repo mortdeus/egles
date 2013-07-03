@@ -1,3 +1,3 @@
 egles
 
-Currently only supports GLFW3 when built with the GLFW_USE_EGL option on Linux.  
+EGL and GLES wrappers to use with the Go programming language.  
