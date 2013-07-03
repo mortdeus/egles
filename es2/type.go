@@ -1,6 +1,6 @@
-package gles2
+package es2
 
-//#cgo linux LDFLAGS: -lGLESv2  -lEGL  
+//#cgo linux LDFLAGS: -lGLESv2  -lEGL
 //#include <stdlib.h>
 //#include <GLES2/gl2.h>
 //#include <GLES2/gl2ext.h>

@@ -46,7 +46,7 @@ func main() {
 }
 func initScene() {
 
-	gl.ClearColor(.4, .4, .4, 0)
+	gl.ClearColor(0, 1, 0, 0)
 	p := Program(FragmentShader(fsh), VertexShader(vsh))
 	gl.UseProgram(p)
 }

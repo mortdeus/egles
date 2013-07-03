@@ -1,6 +1,6 @@
-package gles2
+package es2
 
-//#cgo linux LDFLAGS: -lGLESv2  -lEGL  
+//#cgo linux LDFLAGS: -lGLESv2  -lEGL
 //#include <stdlib.h>
 //#include <GLES2/gl2.h>
 //#include <GLES2/gl2ext.h>
@@ -966,14 +966,14 @@ func VertexAttrib4fv(
 }
 func VertexAttribPointer(
 	indx uint32, size int32, type_ Enum,
-	normalized bool, stride Sizei, ptr Void) {
+	normalized bool, stride Sizei, ptr uint) {
 	C.glVertexAttribPointer(
 		C.GLuint(indx),
 		C.GLint(size),
 		C.GLenum(type_),
 		glBoolean(normalized),
 		C.GLsizei(stride),
-		unsafe.Pointer(ptr))
+		unsafe.Pointer(uintptr(ptr)))
 }
 func Viewport(
 	x int32, y int32, width Sizei, height Sizei) {
@@ -1025,15 +1025,15 @@ func CreateShader(type_ Enum) uint32 {
 	return uint32(C.glCreateShader(
 		C.GLenum(type_)))
 }
-func GetAttribLocation(program uint32, name *string) uintptr {
-	s := glString(*name)
-	return uintptr(C.glGetAttribLocation(
+func GetAttribLocation(program uint32, name string) uint32 {
+	s := glString(name)
+	return uint32(C.glGetAttribLocation(
 		C.GLuint(program),
 		s))
 }
-func GetUniformLocation(program uint32, name string) uintptr {
+func GetUniformLocation(program uint32, name string) uint32 {
 	s := glString(name)
-	return uintptr(C.glGetUniformLocation(
+	return uint32(C.glGetUniformLocation(
 		C.GLuint(program),
 		s))
 }

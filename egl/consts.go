@@ -1,11 +1,14 @@
 package egl
 
 /*
-#cgo pkg-config: egl
 #include <EGL/egl.h>
 #include <EGL/eglplatform.h>
 */
 import "C"
+
+var (
+	DEFAULT_DISPLAY = NativeDisplayType(uintptr(0))
+)
 
 const (
 	/* EGL Versioning */
@@ -25,9 +28,8 @@ const (
 
 	/* Out-of-band handle values */
 
-	NoContext = Context(0)
-	NoSurface = Surface(0)
-
+	NO_CONTEXT = 0
+	No_SURFACE = 0
 	/* Out-of-band attribute value */
 	DONT_CARE = -1
 

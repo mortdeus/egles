@@ -1,4 +1,4 @@
-package gles2
+package es2
 
 const (
 	/* OpenGL ES core versions */
