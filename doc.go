@@ -1,5 +1,5 @@
 /*
-A cross platform egl wrapper for golang.  
+A cross platform egl wrapper for golang.
 */
 package egles
 
@@ -12,4 +12,4 @@ GLES wrappers 		  0% 		done
 */
 type Documentation int
 
-const License = "mortdeus.mit-license.org"
+const Authors = [...]string{"Mortdeus (http://mortdeus.mit-license.org)", "remogatto"}
