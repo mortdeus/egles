@@ -12,4 +12,4 @@ GLES wrappers 		  0% 		done
 */
 type Documentation int
 
-const Authors = [...]string{"Mortdeus (http://mortdeus.mit-license.org)", "remogatto"}
+var Authors = [...]string{"Mortdeus (http://mortdeus.mit-license.org)", "remogatto"}
