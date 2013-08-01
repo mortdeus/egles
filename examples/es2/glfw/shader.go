@@ -1,6 +1,6 @@
 package main
 
-import gl "github.com/mortdeus/egles/gles2"
+import gl "github.com/mortdeus/egles/es2"
 import "log"
 
 const (

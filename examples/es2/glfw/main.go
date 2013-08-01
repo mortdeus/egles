@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	gl "github.com/mortdeus/egles/gles2"
-	"github.com/tapir/glfw3-go"
+	gl "github.com/mortdeus/egles/es2"
+	glfw "github.com/go-gl/glfw3"
 )
 
 const (
@@ -16,7 +16,7 @@ var (
 	redraw = true
 )
 
-func errorCallback(err int, desc string) {
+func errorCallback(err glfw.ErrorCode, desc string) {
 	fmt.Printf("%v: %v\n", err, desc)
 }
 func main() {
