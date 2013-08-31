@@ -154,7 +154,7 @@ func NewCube() *Cube {
 	})
 
 	fragmentShader := (FragmentShader)(`
-	varying vec2 texOut;
+	varying lowp vec2 texOut;
         uniform sampler2D texture;
 
 	void main() {
@@ -166,7 +166,7 @@ func NewCube() *Cube {
         uniform mat4 projection_view;
         attribute vec4 pos;
         attribute vec2 texIn;
-        varying vec2 texOut;
+        varying lowp vec2 texOut;
 
         void main() {
           gl_Position = projection_view*model*pos;

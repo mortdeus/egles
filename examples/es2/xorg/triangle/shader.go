@@ -1,11 +1,10 @@
 package main
 
 import gl "github.com/mortdeus/egles/es2"
-import "log"
 
 var (
 	fsh = `
-	varying vec4 v_color;
+	varying lowp vec4 v_color;
 
 	void main() {
 		gl_FragColor = v_color;
@@ -14,7 +13,7 @@ var (
 	vsh = `
         attribute vec4 pos;
         attribute vec4 color;
-        varying vec4 v_color;
+        varying lowp vec4 v_color;
 
         void main() {
           gl_Position = pos;
@@ -37,7 +36,6 @@ func FragmentShader(s string) uint32 {
 		var length gl.Sizei
 		_log := string(s)
 		gl.GetShaderInfoLog(shader, 1000, &length, &_log)
-		log.Fatalf("Error: compiling:\n%s\n", _log)
 	}
 	return shader
 
@@ -54,7 +52,6 @@ func VertexShader(s string) uint32 {
 		var length gl.Sizei
 		_log := string(s)
 		gl.GetShaderInfoLog(shader, 1000, &length, &_log)
-		log.Fatalf("Error: compiling:\n%s\n", _log)
 	}
 	return shader
 }
@@ -71,7 +68,6 @@ func Program(fsh, vsh uint32) uint32 {
 		var length gl.Sizei
 		_log := string(s)
 		gl.GetProgramInfoLog(p, 1000, &length, &_log)
-		log.Fatalf("Error: linking:\n%s\n", _log)
 	}
 	return p
 }

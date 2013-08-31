@@ -7,14 +7,14 @@ var (
 	vsh = `
         attribute vec4 pos;
         attribute vec2 texIn;
-        varying vec2 texOut;
+        varying lowp vec2 texOut;
         void main() {
           gl_Position = pos;
           texOut = texIn;
         }
 `
 	fsh = `
-        varying vec2 texOut;
+        varying lowp vec2 texOut;
         uniform sampler2D texture;
 	void main() {
 		gl_FragColor = texture2D(texture, texOut);

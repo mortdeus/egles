@@ -30,8 +30,8 @@ func FragmentShader(s string) uint32 {
 	gl.CompileShader(shader)
 	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat == gl.FALSE {
-		log.Printf("Fragment Shader compilation failed.", stat)
+	if stat != 0 {
+		log.Printf("Fragment Shader compilation failed.\n")
 	}
 	return shader
 }
@@ -42,8 +42,8 @@ func VertexShader(s string) uint32 {
 	gl.CompileShader(shader)
 	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat == gl.FALSE {
-		log.Printf("Vertex Shader compilation failed.", stat)
+	if stat != 0 {
+		log.Printf("Vertex Shader compilation failed. \n")
 	}
 	return shader
 }
@@ -54,7 +54,7 @@ func Program(fsh, vsh uint32) uint32 {
 	gl.LinkProgram(p)
 	var stat int32
 	gl.GetProgramiv(p, gl.LINK_STATUS, &stat)
-	if stat == gl.FALSE {
+	if stat != 0 {
 		var s = make([]byte, 1000)
 		var length gl.Sizei
 		_log := string(s)
