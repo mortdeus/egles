@@ -4,7 +4,7 @@ import gl "github.com/mortdeus/egles/es2"
 
 var (
 	fsh = `
-	varying lowp vec4 v_color;
+	varying mediump vec4 v_color;
 
 	void main() {
 		gl_FragColor = v_color;
@@ -13,7 +13,7 @@ var (
 	vsh = `
         attribute vec4 pos;
         attribute vec4 color;
-        varying lowp vec4 v_color;
+        varying mediump vec4 v_color;
 
         void main() {
           gl_Position = pos;

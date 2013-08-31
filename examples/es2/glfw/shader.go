@@ -5,22 +5,21 @@ import "log"
 
 const (
 	fsh = `
-	varying vec4 v_color;
-	
+	varying mediump vec4 v_color;
+
 	void main() {
 		gl_FragColor = v_color;
 	}
-	`
+`
 	vsh = `
-    uniform mat4 modelviewProjection;
-    attribute vec4 pos;
-    attribute vec4 color;
-    varying vec4 v_color;
-    
-    void main() {
-       gl_Position = modelviewProjection * pos;
-       v_color = color;
-    }
+        attribute vec4 pos;
+        attribute vec4 color;
+        varying mediump vec4 v_color;
+
+        void main() {
+          	gl_Position = pos;
+          	v_color = color;
+        }
 `
 )
 
@@ -30,7 +29,7 @@ func FragmentShader(s string) uint32 {
 	gl.CompileShader(shader)
 	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat != 0 {
+	if stat == 0 {
 		log.Printf("Fragment Shader compilation failed.\n")
 	}
 	return shader
@@ -42,7 +41,7 @@ func VertexShader(s string) uint32 {
 	gl.CompileShader(shader)
 	var stat int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat != 0 {
+	if stat == 0 {
 		log.Printf("Vertex Shader compilation failed. \n")
 	}
 	return shader
@@ -54,7 +53,7 @@ func Program(fsh, vsh uint32) uint32 {
 	gl.LinkProgram(p)
 	var stat int32
 	gl.GetProgramiv(p, gl.LINK_STATUS, &stat)
-	if stat != 0 {
+	if stat == 0 {
 		var s = make([]byte, 1000)
 		var length gl.Sizei
 		_log := string(s)

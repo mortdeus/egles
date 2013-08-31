@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	gl "github.com/mortdeus/egles/es2"
 	glfw "github.com/go-gl/glfw3"
+	gl "github.com/mortdeus/egles/es2"
 )
 
 const (
@@ -13,7 +13,18 @@ const (
 )
 
 var (
-	redraw = true
+	vertices = [12]float32{
+		-0.5, -0.5, 0.0, 1.0,
+		0.5, -0.5, 0.0, 1.0,
+		0.0, 0.5, 0.0, 1.0,
+	}
+	colors = [12]float32{
+		1.0, 0.0, 0.0, 1.0,
+		0.0, 1.0, 0.0, 1.0,
+		0.0, 0.0, 1.0, 1.0,
+	}
+	verticesArrayBuffer, colorsArrayBuffer uint32
+	attrPos, attrColor                     uint32
 )
 
 func errorCallback(err glfw.ErrorCode, desc string) {
@@ -45,17 +56,33 @@ func main() {
 	}
 }
 func initScene() {
+	program := Program(FragmentShader(fsh), VertexShader(vsh))
+	gl.UseProgram(program)
+	attrPos = gl.GetAttribLocation(program, "pos")
+	attrColor = gl.GetAttribLocation(program, "color")
+	gl.GenBuffers(1, &verticesArrayBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(vertices))*4, gl.Void(&vertices[0]), gl.STATIC_DRAW)
+	gl.GenBuffers(1, &colorsArrayBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(colors))*4, gl.Void(&colors[0]), gl.STATIC_DRAW)
+	gl.EnableVertexAttribArray(attrPos)
+	gl.EnableVertexAttribArray(attrColor)
+	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 
-	gl.ClearColor(0, 1, 0, 0)
-	p := Program(FragmentShader(fsh), VertexShader(vsh))
-	gl.UseProgram(p)
 }
 func drawScene() {
-	if redraw {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		redraw = false
-	}
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
+	gl.VertexAttribPointer(attrPos, 4, gl.FLOAT, false, 0, 0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
+	gl.VertexAttribPointer(attrColor, 4, gl.FLOAT, false, 0, 0)
+	gl.DrawArrays(gl.TRIANGLES, 0, 3)
+	gl.Flush()
+	gl.Finish()
+
 }
 func reshape(width, height int) {
 	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
+
 }
