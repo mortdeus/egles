@@ -5,19 +5,21 @@ import "log"
 
 const (
 	fsh = `
-	varying mediump vec4 v_color;
+	precision mediump float;
+	varying vec4 v_color;
 
 	void main() {
 		gl_FragColor = v_color;
 	}
 `
 	vsh = `
+	uniform mat4 uMVP;
         attribute vec4 pos;
         attribute vec4 color;
         varying mediump vec4 v_color;
 
         void main() {
-          	gl_Position = pos;
+          	gl_Position =  uMVP * pos;
           	v_color = color;
         }
 `
