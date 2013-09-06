@@ -1025,15 +1025,15 @@ func CreateShader(type_ Enum) uint32 {
 	return uint32(C.glCreateShader(
 		C.GLenum(type_)))
 }
-func GetAttribLocation(program uint32, name string) uint32 {
+func GetAttribLocation(program uint32, name string) int32 {
 	s := glString(name)
-	return uint32(C.glGetAttribLocation(
+	return int32(C.glGetAttribLocation(
 		C.GLuint(program),
 		s))
 }
-func GetUniformLocation(program uint32, name string) uint32 {
+func GetUniformLocation(program uint32, name string) int32 {
 	s := glString(name)
-	return uint32(C.glGetUniformLocation(
+	return int32(C.glGetUniformLocation(
 		C.GLuint(program),
 		s))
 }
