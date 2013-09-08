@@ -8,23 +8,13 @@ package es2
 import "C"
 import "unsafe"
 
-type (
-	Void     unsafe.Pointer
-	Enum     uint32
-	Bitfield uint32
-	Sizei    int32
-	Clampf   float32
-	Fixed    uintptr
-	IntPtr   int
-	SizeiPtr int
-)
+type Void unsafe.Pointer
 
-func glString(s string) *C.GLchar {
+func CString(s string) *C.GLchar {
 	return (*C.GLchar)(C.CString(s))
 }
-func goString(s *C.GLchar) *string {
-	gs := C.GoString((*C.char)(s))
-	return &gs
+func GoString(s *C.GLchar) string {
+	return C.GoString((*C.char)(s))
 }
 func goBoolean(n C.GLboolean) *bool {
 	b := n == 1
