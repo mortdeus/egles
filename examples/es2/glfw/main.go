@@ -5,38 +5,38 @@ import (
 	"fmt"
 	glfw "github.com/go-gl/glfw3"
 	gl "github.com/mortdeus/egles/es2"
-	glm "github.com/mortdeus/mathgl"
+	mgl "github.com/mortdeus/mathgl"
 	"runtime"
 	"sync/atomic"
 	"time"
 )
 
-var (
-	Title    = "egles"
-	Width    = 640
-	Height   = 480
-	vertices = [12]float32{
-		-0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, 0.0, 1.0,
-		0.0, 0.5, 0.0, 1.0,
-	}
-	colors = [12]float32{
-		1.0, 0.0, 0.0, 1.0,
-		0.0, 1.0, 0.0, 1.0,
-		0.0, 0.0, 1.0, 1.0,
-	}
-	verticesArrayBuffer, colorsArrayBuffer uint32
-	attrPos, attrColor                     int32
-	View, Model, Projection, MVP           glm.Mat4f
-	uMVP                                   int32
-	fps                                    = new(uint64)
-)
 var debug = flag.Bool("d", false, "Prints FPS to stdout")
 
 func init() {
 	runtime.LockOSThread()
 	runtime.GOMAXPROCS(2)
 }
+
+var (
+	Title         = "egles"
+	Width, Height = 640, 480
+
+	POSITION = [8]float32{
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 1.0, 1.0, 1.0}
+	COLOR = [16]float32{
+		1.0, 0.0, 0.0, 1.0,
+		0.0, 1.0, 0.0, 1.0,
+		0.0, 0.0, 1.0, 1.0,
+		1.0, 1.0, 0.0, 1.0,
+	}
+	attrPos, attrColor, uMVP int
+	ModelView, Projection    mgl.Mat4f
+
+	MVP = make(chan mgl.Mat4f, 1)
+	fps = new(uint64)
+)
 
 func errorCallback(err glfw.ErrorCode, desc string) {
 	fmt.Printf("%v: %v\n", err, desc)
@@ -60,8 +60,9 @@ func main() {
 	glfw.SwapInterval(1)
 	window.SetSizeCallback(reshape)
 	window.SetKeyCallback(keyEvent)
-	gl.Viewport(0, 0, gl.Sizei(Width), gl.Sizei(Height))
+	gl.Viewport(0, 0, Width, Height)
 	initScene()
+
 	if *debug {
 		go func() {
 			tick := time.Tick(1 * time.Second)
@@ -80,9 +81,16 @@ func main() {
 	}
 }
 func initScene() {
-	Projection = glm.Perspective(45.0, float32(Width)/float32(Height), 0.1, 100.0)
-	View = glm.LookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
-	Model = glm.Ident4f()
+	halfW, halfH := float32(Width)*0.5, float32(Height)*0.5
+
+	Projection = mgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
+		mgl.Translate3D(-halfW, -halfH, 0))
+
+	ModelView = mgl.Ident4f().Mul4(mgl.Scale3D(100, 100, 0))
+	MVP <- Projection.Mul4(ModelView)
+
+	gl.Disable(gl.DEPTH_TEST)
+	gl.DepthMask(false)
 
 	program := Program(FragmentShader(fsh), VertexShader(vsh))
 	gl.UseProgram(program)
@@ -90,74 +98,67 @@ func initScene() {
 	attrPos = gl.GetAttribLocation(program, "pos")
 	attrColor = gl.GetAttribLocation(program, "color")
 
-	gl.GenBuffers(1, &verticesArrayBuffer)
-	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(vertices))*4,
-		gl.Void(&vertices[0]), gl.STATIC_DRAW)
-
-	gl.GenBuffers(1, &colorsArrayBuffer)
-	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(colors))*4,
-		gl.Void(&colors[0]), gl.STATIC_DRAW)
-
-	gl.EnableVertexAttribArray(uint32(attrPos))
-	gl.EnableVertexAttribArray(uint32(attrColor))
-	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
+	gl.EnableVertexAttribArray(attrPos)
+	gl.EnableVertexAttribArray(attrColor)
+	gl.ClearColor(0.5, 0.5, 0.5, 1.0)
+	gl.VertexAttribPointer(attrPos, 2, gl.FLOAT, false, 0, gl.Void(&POSITION))
+	gl.VertexAttribPointer(attrColor, 4, gl.FLOAT, false, 0, gl.Void(&COLOR))
 
 }
 func drawScene() {
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	MVP = Projection.Mul4(View).Mul4(Model)
-	gl.UniformMatrix4fv(int32(uMVP), 1, false, &MVP[0])
-	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.VertexAttribPointer(uint32(attrPos), 4, gl.FLOAT, false, 0, 0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
-	gl.VertexAttribPointer(uint32(attrColor), 4, gl.FLOAT, false, 0, 0)
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 3)
+	select {
+	case m := <-MVP:
+		gl.UniformMatrix4fv(uMVP, 1, false, m[:])
+	default:
+		break
+	}
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 	gl.Flush()
 	gl.Finish()
-
 }
 func reshape(w *glfw.Window, width, height int) {
-	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
-	Projection = glm.Perspective(45.0, float32(width)/float32(height), 0.1, 100.0)
+	gl.Viewport(0, 0, width, height)
+	halfW, halfH := float32(width)*0.5, float32(height)*0.5
+	Projection = mgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
+		mgl.Translate3D(-halfW, -halfH, 0))
 
+	go func(m mgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
 }
 
 func keyEvent(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-
 	switch key {
 	case glfw.KeyEscape:
 		w.SetShouldClose(true)
 	case glfw.KeyLeft:
 		if mods == glfw.ModShift {
-			Model = Model.Mul4(glm.HomogRotate3DY(5))
+			ModelView = ModelView.Mul4(mgl.HomogRotate3DY(5))
 		} else {
-			Model = Model.Mul4(glm.Translate3D(-0.1, 0, 0))
+			ModelView = ModelView.Mul4(mgl.Translate3D(-0.1, 0, 0))
 		}
 	case glfw.KeyRight:
 		if mods == glfw.ModShift {
-			Model = Model.Mul4(glm.HomogRotate3DY(-5))
+			ModelView = ModelView.Mul4(mgl.HomogRotate3DY(-5))
 		} else {
-			Model = Model.Mul4(glm.Translate3D(0.1, 0, 0))
+			ModelView = ModelView.Mul4(mgl.Translate3D(0.1, 0, 0))
 		}
 	case glfw.KeyUp:
 		if mods == glfw.ModShift {
-			Model = Model.Mul4(glm.HomogRotate3DX(5))
+			ModelView = ModelView.Mul4(mgl.HomogRotate3DX(5))
 		} else {
-			Model = Model.Mul4(glm.Translate3D(0, 0.1, 0))
+			ModelView = ModelView.Mul4(mgl.Translate3D(0, 0.1, 0))
 		}
 	case glfw.KeyDown:
 		if mods == glfw.ModShift {
-			Model = Model.Mul4(glm.HomogRotate3DX(-5))
+			ModelView = ModelView.Mul4(mgl.HomogRotate3DX(-5))
 		} else {
-			Model = Model.Mul4(glm.Translate3D(0, -0.1, 0))
+			ModelView = ModelView.Mul4(mgl.Translate3D(0, -0.1, 0))
 		}
 	case glfw.KeyMinus:
-		Model = Model.Mul4(glm.Translate3D(0, 0, -0.1))
+		ModelView = ModelView.Mul4(mgl.Translate3D(0, 0, -0.1))
 	case glfw.KeyEqual:
-		Model = Model.Mul4(glm.Translate3D(0, 0, 0.1))
+		ModelView = ModelView.Mul4(mgl.Translate3D(0, 0, 0.1))
 	}
+	go func(m mgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
 
 }

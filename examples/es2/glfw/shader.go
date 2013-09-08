@@ -1,66 +1,54 @@
 package main
 
 import gl "github.com/mortdeus/egles/es2"
-import "log"
+import "fmt"
 
-const (
-	fsh = `
-	precision mediump float;
-	varying vec4 v_color;
+var fsh = "" +
+	"precision mediump float;" +
+	"varying vec4 v_color;" +
+	"void main() {" +
+	"gl_FragColor = v_color;" +
+	"}"
+var vsh = "" +
+	"uniform mat4 uMVP;" +
+	"attribute vec4 pos;" +
+	"attribute vec4 color;" +
+	"varying mediump vec4 v_color;" +
+	"void main() {" +
+	"gl_Position =  uMVP * pos;" +
+	"v_color = color;" +
+	"}"
 
-	void main() {
-		gl_FragColor = v_color;
-	}
-`
-	vsh = `
-	uniform mat4 uMVP;
-        attribute vec4 pos;
-        attribute vec4 color;
-        varying mediump vec4 v_color;
-
-        void main() {
-          	gl_Position =  uMVP * pos;
-          	v_color = color;
-        }
-`
-)
-
-func FragmentShader(s string) uint32 {
+func FragmentShader(s string) int {
 	shader := gl.CreateShader(gl.FRAGMENT_SHADER)
-	gl.ShaderSource(shader, 1, &s, nil)
+	gl.ShaderSource(shader, s)
 	gl.CompileShader(shader)
-	var stat int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat == 0 {
-		log.Printf("Fragment Shader compilation failed.\n")
-	}
-	return shader
-}
 
-func VertexShader(s string) uint32 {
-	shader := gl.CreateShader(gl.VERTEX_SHADER)
-	gl.ShaderSource(shader, 1, &s, nil)
-	gl.CompileShader(shader)
-	var stat int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &stat)
-	if stat == 0 {
-		log.Printf("Vertex Shader compilation failed. \n")
+	if *debug && gl.GetShaderiv(shader,
+		gl.COMPILE_STATUS, make([]int32, 1))[0] == 0 {
+		fmt.Printf("FSH:\n%s\n", gl.GetShaderInfoLog(shader, 1000))
 	}
 	return shader
 }
-func Program(fsh, vsh uint32) uint32 {
+func VertexShader(s string) int {
+	shader := gl.CreateShader(gl.VERTEX_SHADER)
+	gl.ShaderSource(shader, s)
+	gl.CompileShader(shader)
+
+	if *debug && gl.GetShaderiv(shader,
+		gl.COMPILE_STATUS, make([]int32, 1))[0] == 0 {
+		fmt.Printf("VSH:\n%s\n", gl.GetShaderInfoLog(shader, 1000))
+	}
+	return shader
+}
+func Program(fsh, vsh int) int {
 	p := gl.CreateProgram()
 	gl.AttachShader(p, fsh)
 	gl.AttachShader(p, vsh)
 	gl.LinkProgram(p)
-	var stat int32
-	gl.GetProgramiv(p, gl.LINK_STATUS, &stat)
-	if stat == 0 {
-		var s = make([]byte, 1000)
-		var length gl.Sizei
-		_log := string(s)
-		gl.GetProgramInfoLog(p, 1000, &length, &_log)
-		log.Printf("Error: linking:\n%s\n", _log)
+	if *debug && gl.GetProgramiv(p,
+		gl.LINK_STATUS, make([]int32, 1))[0] == 0 {
+		fmt.Printf("PROG:\n%s\n", gl.GetProgramInfoLog(p, 1000))
 	}
 	return p
 }
