@@ -482,7 +482,7 @@ func VertexAttrib4f(indx uint, x, y, z, w float32) {
 func VertexAttrib4fv(indx uint, values []float32) {
 	C.glVertexAttrib4fv(C.GLuint(indx), (*C.GLfloat)(&values[0]))
 }
-func VertexAttribPointer(indx uint, size int, type_ uint, normalized bool, stride int, ptr Void) {
+func VertexAttribPointer(indx uint, size int, type_ uint, normalized bool, stride int, ptr uintptr) {
 	C.glVertexAttribPointer(C.GLuint(indx), C.GLint(size), C.GLenum(type_),
 		glBoolean(normalized), C.GLsizei(stride), unsafe.Pointer(ptr))
 }

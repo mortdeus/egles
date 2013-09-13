@@ -101,8 +101,8 @@ func initScene() {
 	gl.EnableVertexAttribArray(uint(attrPos))
 	gl.EnableVertexAttribArray(uint(attrColor))
 	gl.ClearColor(0.5, 0.5, 0.5, 1.0)
-	gl.VertexAttribPointer(uint(attrPos), 2, gl.FLOAT, false, 0, gl.Void(&POSITION))
-	gl.VertexAttribPointer(uint(attrColor), 4, gl.FLOAT, false, 0, gl.Void(&COLOR))
+	gl.VertexAttribPointer(uint(attrPos), 2, gl.FLOAT, false, 0, uintptr(gl.Void(&POSITION[0])))
+	gl.VertexAttribPointer(uint(attrColor), 4, gl.FLOAT, false, 0, uintptr(gl.Void(&COLOR[0])))
 
 }
 func drawScene() {
