@@ -17,10 +17,10 @@ import (
 const FRAMES_PER_SECOND = 24
 
 var (
-	signal                                 sigterm
-	verticesArrayBuffer, colorsArrayBuffer uint32
-	attrPos, attrColor                     uint32
-	currWidth, currHeight                  int
+	signal sigterm
+	verticesArrayBuffer, colorsArrayBuffer,
+	attrPos, attrColor uint
+	currWidth, currHeight int
 
 	vertices = [12]float32{
 		-0.5, -0.5, 0.0, 1.0,
@@ -110,26 +110,26 @@ func check() {
 func initShaders() {
 	program := Program(FragmentShader(fsh), VertexShader(vsh))
 	gl.UseProgram(program)
-	attrPos = gl.GetAttribLocation(program, "pos")
-	attrColor = gl.GetAttribLocation(program, "color")
-	gl.GenBuffers(1, &verticesArrayBuffer)
+	attrPos = uint(gl.GetAttribLocation(program, "pos"))
+	attrColor = uint(gl.GetAttribLocation(program, "color"))
+	gl.GenBuffers(1, gl.Void(&verticesArrayBuffer))
 	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(vertices))*4, gl.Void(&vertices[0]), gl.STATIC_DRAW)
-	gl.GenBuffers(1, &colorsArrayBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Void(&vertices[0]), gl.STATIC_DRAW)
+	gl.GenBuffers(1, gl.Void(&colorsArrayBuffer))
 	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(colors))*4, gl.Void(&colors[0]), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(colors)*4, gl.Void(&colors[0]), gl.STATIC_DRAW)
 	gl.EnableVertexAttribArray(attrPos)
 	gl.EnableVertexAttribArray(attrColor)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 }
 
 func draw(width, height int) {
-	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
+	gl.Viewport(0, 0, width, height)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.VertexAttribPointer(attrPos, 4, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(attrPos, 4, gl.FLOAT, false, 0, gl.Void(uintptr(0)))
 	gl.BindBuffer(gl.ARRAY_BUFFER, colorsArrayBuffer)
-	gl.VertexAttribPointer(attrColor, 4, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(attrColor, 4, gl.FLOAT, false, 0, gl.Void(uintptr(0)))
 	gl.DrawArrays(gl.TRIANGLES, 0, 3)
 	gl.Flush()
 	gl.Finish()
@@ -143,7 +143,7 @@ func cleanup() {
 
 func reshape(width, height int) {
 	currWidth, currHeight = width, height
-	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
+	gl.Viewport(0, 0, width, height)
 }
 
 func printInfo() {
