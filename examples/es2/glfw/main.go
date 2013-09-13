@@ -68,7 +68,7 @@ func main() {
 			tick := time.Tick(1 * time.Second)
 			for {
 				<-tick
-				fmt.Printf("FPS:%v\r", atomic.LoadUint64(fps))
+				fmt.Printf("FPS:%v\tGOROUTINE:%v\r", atomic.LoadUint64(fps), runtime.NumGoroutine())
 				atomic.StoreUint64(fps, 0)
 			}
 		}()
@@ -100,7 +100,7 @@ func initScene() {
 
 	gl.EnableVertexAttribArray(uint(attrPos))
 	gl.EnableVertexAttribArray(uint(attrColor))
-	gl.ClearColor(0.5, 0.5, 0.5, 1.0)
+	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.VertexAttribPointer(uint(attrPos), 2, gl.FLOAT, false, 0, uintptr(gl.Void(&POSITION[0])))
 	gl.VertexAttribPointer(uint(attrColor), 4, gl.FLOAT, false, 0, uintptr(gl.Void(&COLOR[0])))
 
