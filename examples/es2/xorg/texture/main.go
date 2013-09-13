@@ -18,11 +18,11 @@ import (
 const FRAMES_PER_SECOND = 24
 
 var (
-	signal                          sigterm
-	verticesArrayBuffer             uint32
-	textureBuffer                   uint32
-	unifTexture, attrPos, attrTexIn uint32
-	currWidth, currHeight           int
+	signal sigterm
+	verticesArrayBuffer, textureBuffer,
+	attrPos, attrTexIn uint
+	unifTexture           int
+	currWidth, currHeight int
 
 	vertices = [24]float32{
 		-1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
@@ -139,40 +139,40 @@ func initShaders() {
 	program := Program(FragmentShader(fsh), VertexShader(vsh))
 	gl.UseProgram(program)
 
-	attrPos = uint32(gl.GetAttribLocation(program, "pos"))
-	attrTexIn = uint32(gl.GetAttribLocation(program, "texIn"))
+	attrPos = uint(gl.GetAttribLocation(program, "pos"))
+	attrTexIn = uint(gl.GetAttribLocation(program, "texIn"))
 	unifTexture = gl.GetUniformLocation(program, "texture")
 	gl.EnableVertexAttribArray(attrPos)
 	gl.EnableVertexAttribArray(attrTexIn)
 
 	// Upload vertices data
-	gl.GenBuffers(1, &verticesArrayBuffer)
+	gl.GenBuffers(1, gl.Void(&verticesArrayBuffer))
 	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.SizeiPtr(len(vertices))*4, gl.Void(&vertices[0]), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Void(&vertices[0]), gl.STATIC_DRAW)
 
 	// Upload texture data
 	imageBuffer, width, height := loadImage()
-	gl.GenTextures(1, &textureBuffer)
+	gl.GenTextures(1, gl.Void(&textureBuffer))
 	gl.BindTexture(gl.TEXTURE_2D, textureBuffer)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.Sizei(width), gl.Sizei(height), 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Void(&imageBuffer[0]))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Void(&imageBuffer[0]))
 
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 }
 
 func draw(width, height int) {
-	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
+	gl.Viewport(0, 0, width, height)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.BindBuffer(gl.ARRAY_BUFFER, verticesArrayBuffer)
-	gl.VertexAttribPointer(attrPos, 4, gl.FLOAT, false, 6*4, 0)
+	gl.VertexAttribPointer(attrPos, 4, gl.FLOAT, false, 6*4, gl.Void(uintptr(0)))
 
 	// bind texture - FIX size of vertex
 
-	gl.VertexAttribPointer(attrTexIn, 2, gl.FLOAT, false, 6*4, 4*4)
+	gl.VertexAttribPointer(attrTexIn, 2, gl.FLOAT, false, 6*4, gl.Void(uintptr(4*4)))
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, textureBuffer)
-	gl.Uniform1i(int32(unifTexture), 0)
+	gl.Uniform1i(unifTexture, 0)
 
 	gl.DrawArrays(gl.TRIANGLE_FAN, 0, 4)
 	gl.Flush()
@@ -187,7 +187,7 @@ func cleanup() {
 
 func reshape(width, height int) {
 	currWidth, currHeight = width, height
-	gl.Viewport(0, 0, gl.Sizei(width), gl.Sizei(height))
+	gl.Viewport(0, 0, width, height)
 }
 
 func printInfo() {
