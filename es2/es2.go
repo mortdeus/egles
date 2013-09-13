@@ -235,12 +235,12 @@ func GetIntegerv(pname uint, params []int32) []int32 {
 	return params
 }
 func GetProgramiv(program, pname uint, params []int32) []int32 {
-	C.glGetProgramiv(C.GLuint(program), C.GLenum(pname), (*C.GLint)(&params[0]))
+	C.glGetProgramiv(C.GLuint(program), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 	return params
 }
 func GetProgramInfoLog(program uint, bufsize int) string {
 	cs := CString("")
-	defer C.free(unsafe.Pointer(cs))
+	//defer C.free(unsafe.Pointer(cs))
 	C.glGetProgramInfoLog(C.GLuint(program), C.GLsizei(bufsize), nil, cs)
 	return GoString(cs)
 
@@ -251,12 +251,12 @@ func GetRenderbufferParameteriv(target, pname uint, params []int32) []int32 {
 	return params
 }
 func GetShaderiv(shader, pname uint, params []int32) []int32 {
-	C.glGetShaderiv(C.GLuint(shader), C.GLenum(pname), (*C.GLint)(&params[0]))
+	C.glGetShaderiv(C.GLuint(shader), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 	return params
 }
 func GetShaderInfoLog(shader uint, bufsize int) string {
 	cs := CString("")
-	defer C.free(unsafe.Pointer(cs))
+	//defer C.free(unsafe.Pointer(cs))
 	C.glGetShaderInfoLog(C.GLuint(shader), C.GLsizei(bufsize), nil, cs)
 	return GoString(cs)
 }
@@ -269,7 +269,7 @@ func GetShaderPrecisionFormat(shadertype, precisiontype uint) (
 }
 func GetShaderSource(shader uint, bufsize int) string {
 	cs := CString("")
-	defer C.free(unsafe.Pointer(cs))
+	//defer C.free(unsafe.Pointer(cs))
 	C.glGetShaderSource(C.GLuint(shader), C.GLsizei(bufsize), nil, cs)
 	return GoString(cs)
 }
