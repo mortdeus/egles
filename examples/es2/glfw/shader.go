@@ -19,7 +19,7 @@ var vsh = "" +
 	"v_color = color;" +
 	"}"
 
-func FragmentShader(s string) int {
+func FragmentShader(s string) uint {
 	shader := gl.CreateShader(gl.FRAGMENT_SHADER)
 	gl.ShaderSource(shader, s)
 	gl.CompileShader(shader)
@@ -30,7 +30,7 @@ func FragmentShader(s string) int {
 	}
 	return shader
 }
-func VertexShader(s string) int {
+func VertexShader(s string) uint {
 	shader := gl.CreateShader(gl.VERTEX_SHADER)
 	gl.ShaderSource(shader, s)
 	gl.CompileShader(shader)
@@ -41,7 +41,7 @@ func VertexShader(s string) int {
 	}
 	return shader
 }
-func Program(fsh, vsh int) int {
+func Program(fsh, vsh uint) uint {
 	p := gl.CreateProgram()
 	gl.AttachShader(p, fsh)
 	gl.AttachShader(p, vsh)
