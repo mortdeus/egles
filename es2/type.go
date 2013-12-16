@@ -6,9 +6,6 @@ package es2
 //#include <GLES2/gl2ext.h>
 //#include <GLES2/gl2platform.h>
 import "C"
-import "unsafe"
-
-type Void unsafe.Pointer
 
 func CString(s string) *C.GLchar {
 	return (*C.GLchar)(C.CString(s))

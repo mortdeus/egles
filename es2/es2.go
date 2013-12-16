@@ -7,6 +7,7 @@ package es2
 //#include <GLES2/gl2platform.h>
 import "C"
 import "unsafe"
+import "reflect"
 
 func ActiveTexture(texture uint) {
 	C.glActiveTexture(C.GLenum(texture))
@@ -47,15 +48,15 @@ func BlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha uint) {
 		C.GLenum(srcRGB), C.GLenum(dstRGB),
 		C.GLenum(srcAlpha), C.GLenum(dstAlpha))
 }
-func BufferData(target uint, size int, data Void, usage uint) {
+func BufferData(target uint, size int, data interface{}, usage uint) {
 	C.glBufferData(
 		C.GLenum(target), C.GLsizeiptr(size),
-		unsafe.Pointer(data), C.GLenum(usage))
+		unsafe.Pointer(reflect.ValueOf(data).Pointer()), C.GLenum(usage))
 }
-func BufferSubData(target uint, offset int, size int, data Void) {
+func BufferSubData(target uint, offset int, size int, data interface{}) {
 	C.glBufferSubData(
 		C.GLenum(target), C.GLintptr(offset),
-		C.GLsizeiptr(size), unsafe.Pointer(data))
+		C.GLsizeiptr(size), unsafe.Pointer(reflect.ValueOf(data).Pointer()))
 }
 func Clear(mask uint) { C.glClear(C.GLbitfield(mask)) }
 
@@ -78,21 +79,21 @@ func ColorMask(red, green, blue, alpha bool) {
 func CompileShader(shader uint) { C.glCompileShader(C.GLuint(shader)) }
 
 func CompressedTexImage2D(target uint, level int, internalformat uint,
-	width, height, border, imageSize int, data Void) {
+	width, height, border, imageSize int, data interface{}) {
 	C.glCompressedTexImage2D(
 		C.GLenum(target), C.GLint(level), C.GLenum(internalformat),
 		C.GLsizei(width), C.GLsizei(height),
 		C.GLint(border), C.GLsizei(imageSize),
-		unsafe.Pointer(data))
+		unsafe.Pointer(reflect.ValueOf(data).Pointer()))
 }
 func CompressedTexSubImage2D(target uint, level, xoffset, yoffset int,
-	width, height int, format uint, imageSize int, data Void) {
+	width, height int, format uint, imageSize int, data interface{}) {
 	C.glCompressedTexSubImage2D(
 		C.GLenum(target), C.GLint(level),
 		C.GLint(xoffset), C.GLint(yoffset),
 		C.GLsizei(width), C.GLsizei(height),
 		C.GLenum(format), C.GLsizei(imageSize),
-		unsafe.Pointer(data))
+		unsafe.Pointer(reflect.ValueOf(data).Pointer()))
 }
 func CopyTexImage2D(target uint, level int, internalformat uint,
 	x, y, width, height, border int) {
@@ -146,14 +147,14 @@ func DisableVertexAttribArray(index uint) {
 func DrawArrays(mode uint, first, count int) {
 	C.glDrawArrays(C.GLenum(mode), C.GLint(first), C.GLsizei(count))
 }
-func DrawElements(mode uint, count int, type_ uint, indices Void) {
+func DrawElements(mode uint, count int, type_ uint, indices interface{}) {
 	C.glDrawElements(
 		C.GLenum(mode), C.GLsizei(count),
-		C.GLenum(type_), unsafe.Pointer(indices))
+		C.GLenum(type_), unsafe.Pointer(reflect.ValueOf(indices).Pointer()))
 }
 
-func EnableVertexAttribArray(index uint) {
-	C.glEnableVertexAttribArray(C.GLuint(index))
+func EnableVertexAttribArray(index int) {
+	C.glEnableVertexAttribArray(C.GLuint(uint(index)))
 }
 func Enable(cap int) { C.glEnable(C.GLenum(cap)) }
 func Finish()        { C.glFinish() }
@@ -172,8 +173,8 @@ func FramebufferTexture2D(target, attachment, textarget, texture uint, level int
 func FrontFace(mode uint) {
 	C.glFrontFace(C.GLenum(mode))
 }
-func GenBuffers(n int, buffers Void) {
-	C.glGenBuffers(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(buffers)))
+func GenBuffers(n int, buffers interface{}) {
+	C.glGenBuffers(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(reflect.ValueOf(buffers).Pointer())))
 }
 func GenerateMipmap(target uint) {
 	C.glGenerateMipmap(C.GLenum(target))
@@ -184,8 +185,8 @@ func GenFramebuffers(n int, framebuffers *uint32) {
 func GenRenderbuffers(n int, renderbuffers *uint32) {
 	C.glGenRenderbuffers(C.GLsizei(n), (*C.GLuint)(renderbuffers))
 }
-func GenTextures(n int, textures Void) {
-	C.glGenTextures(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(textures)))
+func GenTextures(n int, textures interface{}) {
+	C.glGenTextures(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(reflect.ValueOf(textures).Pointer())))
 }
 func GetActiveAttrib(program, index uint, bufsize int) (size int32, type_ uint32, name string) {
 	cs := CString(name)
@@ -297,8 +298,9 @@ func GetVertexAttribiv(index, pname uint, params []int32) []int32 {
 	C.glGetVertexAttribiv(C.GLuint(index), C.GLenum(pname), (*C.GLint)(&params[0]))
 	return params
 }
-func GetVertexAttribPointerv(index, pname uint, pointer []Void) []Void {
-	C.glGetVertexAttribPointerv(C.GLuint(index), C.GLenum(pname), (*unsafe.Pointer)(&pointer[0]))
+func GetVertexAttribPointerv(index, pname uint, pointer interface{}) interface{} {
+	ptr := unsafe.Pointer(reflect.ValueOf(pointer).Pointer())
+	C.glGetVertexAttribPointerv(C.GLuint(index), C.GLenum(pname), &ptr)
 	return pointer
 }
 func Hint(target, mode uint) {
@@ -316,9 +318,9 @@ func PixelStorei(pname, param uint) {
 func PolygonOffset(factor float32, units float32) {
 	C.glPolygonOffset(C.GLfloat(factor), C.GLfloat(units))
 }
-func ReadPixels(x, y, width, height int, format, type_ uint, pixels Void) {
+func ReadPixels(x, y, width, height int, format, type_ uint, pixels interface{}) {
 	C.glReadPixels(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height),
-		C.GLenum(format), C.GLenum(type_), unsafe.Pointer(pixels))
+		C.GLenum(format), C.GLenum(type_), unsafe.Pointer(reflect.ValueOf(pixels).Pointer()))
 }
 func ReleaseShaderCompiler() {
 	C.glReleaseShaderCompiler()
@@ -333,9 +335,12 @@ func SampleCoverage(value float32, invert bool) {
 func Scissor(x, y, width, height int) {
 	C.glScissor(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
-func ShaderBinary(n int, shaders Void, binaryformat uint, binary Void, length int) {
-	C.glShaderBinary(C.GLsizei(n), (*C.GLuint)(shaders),
-		C.GLenum(binaryformat), unsafe.Pointer(binary), C.GLsizei(length))
+func ShaderBinary(n int, shaders interface{}, binaryformat uint, binary interface{}, length int) {
+	C.glShaderBinary(C.GLsizei(n),
+		(*C.GLuint)(unsafe.Pointer(reflect.ValueOf(shaders).Pointer())),
+		C.GLenum(binaryformat),
+		unsafe.Pointer(reflect.ValueOf(binary).Pointer()),
+		C.GLsizei(length))
 }
 func ShaderSource(shader uint, s string) {
 	cs := CString(s)
@@ -363,10 +368,13 @@ func StencilOpSeparate(face, fail, zfail, zpass uint) {
 		C.GLenum(face), C.GLenum(fail), C.GLenum(zfail), C.GLenum(zpass))
 }
 func TexImage2D(target uint, level, internalformat, width, height,
-	border int, format, type_ uint, pixels Void) {
-	C.glTexImage2D(C.GLenum(target), C.GLint(level), C.GLint(internalformat),
+	border int, format, type_ uint, pixels interface{}) {
+
+	C.glTexImage2D(
+		C.GLenum(target), C.GLint(level), C.GLint(internalformat),
 		C.GLsizei(width), C.GLsizei(height), C.GLint(border),
-		C.GLenum(format), C.GLenum(type_), unsafe.Pointer(pixels))
+		C.GLenum(format), C.GLenum(type_),
+		unsafe.Pointer(reflect.ValueOf(pixels).Pointer()))
 }
 func TexParameterf(target, pname uint, param float32) {
 	C.glTexParameterf(C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
@@ -383,12 +391,12 @@ func TexParameteriv(target, pname uint, params []int32) []int32 {
 	return params
 }
 func TexSubImage2D(target uint, level, xoffset, yoffset, width, height int,
-	format, type_ uint, pixels Void) {
+	format, type_ uint, pixels interface{}) {
 
 	C.glTexSubImage2D(C.GLenum(target), C.GLint(level),
 		C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height),
 		C.GLenum(format), C.GLenum(type_),
-		unsafe.Pointer(pixels))
+		unsafe.Pointer(reflect.ValueOf(pixels).Pointer()))
 }
 func Uniform1f(location int, x float32) {
 	C.glUniform1f(C.GLint(location), C.GLfloat(x))
@@ -457,34 +465,34 @@ func UseProgram(program uint) {
 func ValidateProgram(program uint) {
 	C.glValidateProgram(C.GLuint(program))
 }
-func VertexAttrib1f(indx uint, x float32) {
-	C.glVertexAttrib1f(C.GLuint(indx), C.GLfloat(x))
+func VertexAttrib1f(indx int, x float32) {
+	C.glVertexAttrib1f(C.GLuint(uint(indx)), C.GLfloat(x))
 }
-func VertexAttrib1fv(indx uint, values []float32) {
-	C.glVertexAttrib1fv(C.GLuint(indx), (*C.GLfloat)(&values[0]))
+func VertexAttrib1fv(indx int, values []float32) {
+	C.glVertexAttrib1fv(C.GLuint(uint(indx)), (*C.GLfloat)(&values[0]))
 }
-func VertexAttrib2f(indx uint, x, y float32) {
-	C.glVertexAttrib2f(C.GLuint(indx), C.GLfloat(x), C.GLfloat(y))
+func VertexAttrib2f(indx int, x, y float32) {
+	C.glVertexAttrib2f(C.GLuint(uint(indx)), C.GLfloat(x), C.GLfloat(y))
 }
-func VertexAttrib2fv(indx uint, values []float32) {
-	C.glVertexAttrib2fv(C.GLuint(indx), (*C.GLfloat)(&values[0]))
+func VertexAttrib2fv(indx int, values []float32) {
+	C.glVertexAttrib2fv(C.GLuint(uint(indx)), (*C.GLfloat)(&values[0]))
 }
-func VertexAttrib3f(indx uint, x, y, z float32) {
-	C.glVertexAttrib3f(C.GLuint(indx), C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
+func VertexAttrib3f(indx int, x, y, z float32) {
+	C.glVertexAttrib3f(C.GLuint(uint(indx)), C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
-func VertexAttrib3fv(indx uint, values []float32) {
-	C.glVertexAttrib3fv(C.GLuint(indx), (*C.GLfloat)(&values[0]))
+func VertexAttrib3fv(indx int, values []float32) {
+	C.glVertexAttrib3fv(C.GLuint(uint(indx)), (*C.GLfloat)(&values[0]))
 }
-func VertexAttrib4f(indx uint, x, y, z, w float32) {
-	C.glVertexAttrib4f(C.GLuint(indx),
+func VertexAttrib4f(indx int, x, y, z, w float32) {
+	C.glVertexAttrib4f(C.GLuint(uint(indx)),
 		C.GLfloat(x), C.GLfloat(y), C.GLfloat(z), C.GLfloat(w))
 }
-func VertexAttrib4fv(indx uint, values []float32) {
-	C.glVertexAttrib4fv(C.GLuint(indx), (*C.GLfloat)(&values[0]))
+func VertexAttrib4fv(indx int, values []float32) {
+	C.glVertexAttrib4fv(C.GLuint(uint(indx)), (*C.GLfloat)(&values[0]))
 }
-func VertexAttribPointer(indx uint, size int, type_ uint, normalized bool, stride int, ptr uintptr) {
-	C.glVertexAttribPointer(C.GLuint(indx), C.GLint(size), C.GLenum(type_),
-		glBoolean(normalized), C.GLsizei(stride), unsafe.Pointer(ptr))
+func VertexAttribPointer(indx int, size int, type_ uint, normalized bool, stride int, ptr interface{}) {
+	C.glVertexAttribPointer(C.GLuint(uint(indx)), C.GLint(size), C.GLenum(type_),
+		glBoolean(normalized), C.GLsizei(stride), unsafe.Pointer(reflect.ValueOf(ptr).Pointer()))
 }
 func Viewport(x int, y int, width int, height int) {
 	C.glViewport(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
@@ -526,11 +534,13 @@ func GetAttribLocation(program uint, name string) int {
 	s := CString(name)
 	defer C.free(unsafe.Pointer(s))
 	return int(C.glGetAttribLocation(C.GLuint(program), s))
+
 }
 func GetUniformLocation(program uint, name string) int {
 	s := CString(name)
 	defer C.free(unsafe.Pointer(s))
 	return int(C.glGetUniformLocation(C.GLuint(program), s))
+
 }
 func GetString(name uint) string {
 	s := (*C.GLchar)(unsafe.Pointer(C.glGetString(C.GLenum(name))))

@@ -6,7 +6,4 @@ package es2
 	* Change &a[0] pointers for functions like
 	gl.UniformMatrix4fv(int32(uMVP), 1, false, &MVP[0])
 	to take an array instead.
-
-
-
 */
