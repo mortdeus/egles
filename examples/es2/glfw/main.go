@@ -5,7 +5,7 @@ import (
 	"fmt"
 	glfw "github.com/go-gl/glfw3"
 	gl "github.com/mortdeus/egles/es2"
-	mgl "github.com/mortdeus/mathgl"
+	"github.com/mortdeus/mathgl"
 	"runtime"
 	"sync/atomic"
 	"time"
@@ -32,9 +32,9 @@ var (
 		1.0, 1.0, 0.0, 1.0,
 	}
 	attrPos, attrColor, uMVP int
-	ModelView, Projection    mgl.Mat4f
+	ModelView, Projection    mathgl.Mat4f
 
-	MVP = make(chan mgl.Mat4f, 1)
+	MVP = make(chan mathgl.Mat4f, 1)
 	fps = new(uint64)
 )
 
@@ -83,10 +83,10 @@ func main() {
 func initScene() {
 	halfW, halfH := float32(Width)*0.5, float32(Height)*0.5
 
-	Projection = mgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
-		mgl.Translate3D(-halfW, -halfH, 0))
+	Projection = mathgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
+		mathgl.Translate3D(-halfW, -halfH, 0))
 
-	ModelView = mgl.Ident4f().Mul4(mgl.Scale3D(100, 100, 0))
+	ModelView = mathgl.Ident4f().Mul4(mathgl.Scale3D(100, 100, 0))
 	MVP <- Projection.Mul4(ModelView)
 
 	gl.Disable(gl.DEPTH_TEST)
@@ -94,15 +94,16 @@ func initScene() {
 
 	program := Program(FragmentShader(fsh), VertexShader(vsh))
 	gl.UseProgram(uint(program))
+
 	uMVP = gl.GetUniformLocation(program, "uMVP")
 	attrPos = gl.GetAttribLocation(program, "pos")
 	attrColor = gl.GetAttribLocation(program, "color")
 
-	gl.EnableVertexAttribArray(uint(attrPos))
-	gl.EnableVertexAttribArray(uint(attrColor))
+	gl.EnableVertexAttribArray(attrPos)
+	gl.EnableVertexAttribArray(attrColor)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
-	gl.VertexAttribPointer(uint(attrPos), 2, gl.FLOAT, false, 0, uintptr(gl.Void(&POSITION[0])))
-	gl.VertexAttribPointer(uint(attrColor), 4, gl.FLOAT, false, 0, uintptr(gl.Void(&COLOR[0])))
+	gl.VertexAttribPointer(attrPos, 2, gl.FLOAT, false, 0, &POSITION)
+	gl.VertexAttribPointer(attrColor, 4, gl.FLOAT, false, 0, &COLOR)
 
 }
 func drawScene() {
@@ -120,10 +121,10 @@ func drawScene() {
 func reshape(w *glfw.Window, width, height int) {
 	gl.Viewport(0, 0, width, height)
 	halfW, halfH := float32(width)*0.5, float32(height)*0.5
-	Projection = mgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
-		mgl.Translate3D(-halfW, -halfH, 0))
+	Projection = mathgl.Ortho2D(-halfW, halfW, -halfH, halfH).Mul4(
+		mathgl.Translate3D(-halfW, -halfH, 0))
 
-	go func(m mgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
+	go func(m mathgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
 }
 
 func keyEvent(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -132,33 +133,33 @@ func keyEvent(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mo
 		w.SetShouldClose(true)
 	case glfw.KeyLeft:
 		if mods == glfw.ModShift {
-			ModelView = ModelView.Mul4(mgl.HomogRotate3DY(5))
+			ModelView = ModelView.Mul4(mathgl.HomogRotate3DY(5))
 		} else {
-			ModelView = ModelView.Mul4(mgl.Translate3D(-0.1, 0, 0))
+			ModelView = ModelView.Mul4(mathgl.Translate3D(-0.1, 0, 0))
 		}
 	case glfw.KeyRight:
 		if mods == glfw.ModShift {
-			ModelView = ModelView.Mul4(mgl.HomogRotate3DY(-5))
+			ModelView = ModelView.Mul4(mathgl.HomogRotate3DY(-5))
 		} else {
-			ModelView = ModelView.Mul4(mgl.Translate3D(0.1, 0, 0))
+			ModelView = ModelView.Mul4(mathgl.Translate3D(0.1, 0, 0))
 		}
 	case glfw.KeyUp:
 		if mods == glfw.ModShift {
-			ModelView = ModelView.Mul4(mgl.HomogRotate3DX(5))
+			ModelView = ModelView.Mul4(mathgl.HomogRotate3DX(5))
 		} else {
-			ModelView = ModelView.Mul4(mgl.Translate3D(0, 0.1, 0))
+			ModelView = ModelView.Mul4(mathgl.Translate3D(0, 0.1, 0))
 		}
 	case glfw.KeyDown:
 		if mods == glfw.ModShift {
-			ModelView = ModelView.Mul4(mgl.HomogRotate3DX(-5))
+			ModelView = ModelView.Mul4(mathgl.HomogRotate3DX(-5))
 		} else {
-			ModelView = ModelView.Mul4(mgl.Translate3D(0, -0.1, 0))
+			ModelView = ModelView.Mul4(mathgl.Translate3D(0, -0.1, 0))
 		}
 	case glfw.KeyMinus:
-		ModelView = ModelView.Mul4(mgl.Translate3D(0, 0, -0.1))
+		ModelView = ModelView.Mul4(mathgl.Translate3D(0, 0, -0.1))
 	case glfw.KeyEqual:
-		ModelView = ModelView.Mul4(mgl.Translate3D(0, 0, 0.1))
+		ModelView = ModelView.Mul4(mathgl.Translate3D(0, 0, 0.1))
 	}
-	go func(m mgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
+	go func(m mathgl.Mat4f) { MVP <- m }(Projection.Mul4(ModelView))
 
 }
