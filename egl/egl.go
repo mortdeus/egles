@@ -48,7 +48,7 @@ func GetCurrentSurface(readdraw int) Surface {
 }
 func QuerySurface(d Display, value []int, attribute int, surface Surface) bool {
 	return goBool(C.eglQuerySurface(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface)),
+		C.EGLSurface(surface),
 		C.EGLint(attribute),
 		(*C.EGLint)(unsafe.Pointer(&value[0]))))
 }
@@ -118,24 +118,24 @@ func SurfaceAttrib(d Display, surface Surface,
 	attribute int, value int) bool {
 
 	return goBool(C.eglSurfaceAttrib(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface)),
+		C.EGLSurface(surface),
 		C.EGLint(attribute),
 		C.EGLint(value)))
 }
 func BindTexImage(d Display, surface Surface, buffer int) bool {
 	return goBool(C.eglBindTexImage(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface)),
+		C.EGLSurface(surface),
 		C.EGLint(buffer)))
 }
 func ReleaseTexImage(d Display, surface Surface, buffer int) bool {
 	return goBool(C.eglReleaseTexImage(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface)),
+		C.EGLSurface(surface),
 		C.EGLint(buffer)))
 }
 func MakeCurrent(d Display, draw Surface, read Surface, ctx Context) bool {
 	return goBool(C.eglMakeCurrent(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(draw)),
-		C.EGLSurface(unsafe.Pointer(read)),
+		C.EGLSurface(draw),
+		C.EGLSurface(read),
 		C.EGLContext(ctx)))
 }
 func QueryContext(d Display, ctx Context, attribute int, value []int) bool {
@@ -146,12 +146,12 @@ func QueryContext(d Display, ctx Context, attribute int, value []int) bool {
 }
 func CopyBuffers(d Display, surface Surface, target NativePixmap) bool {
 	return goBool(C.eglCopyBuffers(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface)),
+		C.EGLSurface(surface),
 		C.EGLNativePixmapType(uintptr(target))))
 }
 func SwapBuffers(d Display, surface Surface) bool {
 	return goBool(C.eglSwapBuffers(C.EGLDisplay(d),
-		C.EGLSurface(unsafe.Pointer(surface))))
+		C.EGLSurface(surface)))
 }
 func BindAPI(api uint) bool {
 	return goBool(C.eglBindAPI(C.EGLenum(api)))
