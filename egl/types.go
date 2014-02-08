@@ -1,10 +1,9 @@
+//http://mortdeus.mit-license.org
+
 package egl
 
 /*
-#include <stdlib.h>
 #include <EGL/egl.h>
-#include <EGL/eglplatform.h>
-#include <EGL/eglext.h>
 */
 import "C"
 import "unsafe"
