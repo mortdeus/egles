@@ -10,21 +10,29 @@ import "C"
 import "unsafe"
 
 type (
-	Enum              uint32
-	Config            uintptr
-	Context           uintptr
-	Display           uintptr
-	Surface           uintptr
-	ClientBuffer      uintptr
-	NativeDisplayType unsafe.Pointer
-	NativeWindowType  unsafe.Pointer
-	NativePixmapType  unsafe.Pointer
+	Config        unsafe.Pointer
+	Context       unsafe.Pointer
+	Display       unsafe.Pointer
+	Surface       unsafe.Pointer
+	ClientBuffer  unsafe.Pointer
+	NativeDisplay unsafe.Pointer
+	NativeWindow  unsafe.Pointer
+	NativePixmap  unsafe.Pointer
 )
 
-func goBoolean(n C.EGLBoolean) bool {
+var (
+	DEFAULT_DISPLAY NativeDisplay
+	NO_CONTEXT      Context
+	NO_DISPLAY      Display
+	NO_SURFACE      Surface
+)
+
+var Version struct{ Maj, Min int }
+
+func goBool(n C.EGLBoolean) bool {
 	return n == 1
 }
-func eglBoolean(n bool) C.EGLBoolean {
+func eglBool(n bool) C.EGLBoolean {
 	var b int
 	if n == true {
 		b = 1
