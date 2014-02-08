@@ -174,6 +174,6 @@ func ReleaseThread() bool {
 func GetCurrentDisplay() Display {
 	return Display(C.eglGetCurrentDisplay())
 }
-func GetError() int {
-	return int(C.eglGetError())
+func GetError() error {
+	return Error(C.eglGetError())
 }
