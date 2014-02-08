@@ -52,18 +52,18 @@ func QuerySurface(d Display, value []int, attribute int, surface Surface) bool {
 		C.EGLint(attribute),
 		(*C.EGLint)(unsafe.Pointer(&value[0]))))
 }
-func GetConfigs(d Display, configs []Config, configSize int, numConfig *int) bool {
+func GetConfigs(d Display, configs []Config, configSize int, numConfig []int) bool {
 	return goBool(C.eglGetConfigs(C.EGLDisplay(d),
 		(*C.EGLConfig)(unsafe.Pointer(&configs[0])),
 		C.EGLint(configSize),
-		(*C.EGLint)(unsafe.Pointer(numConfig))))
+		(*C.EGLint)(unsafe.Pointer(&numConfig[0]))))
 }
 
-func GetConfigAttrib(d Display, config Config, attribute int, value *int) bool {
+func GetConfigAttrib(d Display, config Config, attribute int, value []int) bool {
 	return goBool(C.eglGetConfigAttrib(C.EGLDisplay(d),
 		C.EGLConfig(config),
 		C.EGLint(attribute),
-		(*C.EGLint)(unsafe.Pointer(value))))
+		(*C.EGLint)(unsafe.Pointer(&value[0]))))
 }
 func ChooseConfig(d Display, atrribList []int, configs []Config,
 	configSize int, numConfig []int) bool {
